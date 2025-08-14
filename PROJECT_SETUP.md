@@ -18,6 +18,14 @@ Converting MT63 TypeScript implementation into a publishable npm library as `@ha
 - **VS Code config**: Include `.vscode/` in repository (not gitignored)
 - **Commit style**: Conventional Commits format and keep messages succinct
 - **Package name**: `@hamstudy/mt63`
+- **Repository URL**: `git+https://github.com/HamStudy/mt63-js.git`
+- **License**: `SEE LICENSE IN LICENSE` (need LICENSE file)
+- **Author**: `HamStudy.org LLC`
+- **Version**: `1.0.0-beta.0`
+- **Module type**: ES modules (`"type": "module"`)
+- **Linting**: Strict ESLint rules with TypeScript
+- **Code style**: Backticks > single quotes > double quotes, 100 char line length
+- **Import ordering**: External deps first, then internal alphabetically
 
 ## Phase 1: Project Infrastructure Setup
 
@@ -27,26 +35,31 @@ Converting MT63 TypeScript implementation into a publishable npm library as `@ha
 - [x] Create `.gitignore` (exclude node_modules, dist, .env, OS files, but include .vscode)
 - [x] Initial commit with conventional commit message
 
-### 2. Package.json Setup (Pending)
+### 2. Package.json Setup ✅ (Complete)
 
-- [ ] Project metadata and description
-- [ ] Dependencies and devDependencies
-- [ ] Scripts for build, test, lint
-- [ ] NPM publishing configuration
+- [x] Project metadata and description
+- [x] Dependencies and devDependencies
+- [x] NPM publishing configuration
 
-### 3. TypeScript Configuration (Pending)
+### 3. Build Scripts Setup (Pending)
+
+- [ ] Determine build tool (tsc, rollup, rolldown, etc.)
+- [ ] Development scripts
+- [ ] Lint and test scripts
+- [ ] Publishing workflow scripts
+
+### 4. TypeScript Configuration (Pending)
 
 - [ ] tsconfig.json for compilation
 - [ ] Module resolution and output settings
 - [ ] Type checking configuration
 
-### 4. Development Tooling (Pending)
+### 5. Development Tooling (Pending)
 
 - [ ] ESLint configuration
 - [ ] Prettier setup
-- [ ] Build scripts
 
-### 5. Directory Structure (Pending)
+### 6. Directory Structure (Pending)
 
 - [ ] Organize for library distribution
 - [ ] Entry points and exports
@@ -71,7 +84,8 @@ Converting MT63 TypeScript implementation into a publishable npm library as `@ha
 - [ ] Build pipeline
 - [ ] Testing setup (Jest)
 - [ ] NPM packaging
-- [ ] README and documentation
+- [ ] README.md documentation
+- [ ] LICENSE file creation
 
 ## Notes
 

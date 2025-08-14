@@ -1,0 +1,34 @@
+{
+  "name": "@hamstudy/mt63",
+  "version": "1.0.0-beta.0",
+  "description": "TypeScript implementation of MT63 digital mode for amateur radio",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "keywords": [
+    "mt63",
+    "amateur-radio",
+    "digital-mode",
+    "ham-radio",
+    "dsp",
+    "modem"
+  ],
+  "author": "HamStudy.org LLC",
+  "license": "SEE LICENSE IN LICENSE",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HamStudy/mt63-js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/HamStudy/mt63-js/issues"
+  },
+  "homepage": "https://github.com/HamStudy/mt63-js#readme",
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "engines": {
+    "node": "^18.18.0 || ^20.9.0 || >=21.1.0"
+  }
+}
