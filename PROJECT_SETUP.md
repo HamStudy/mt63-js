@@ -60,27 +60,37 @@ Converting MT63 TypeScript implementation into a publishable npm library as `@ha
 - [x] Prettier setup
 - [ ] Fix ESLint violations (166 issues found)
 
-### 6. Directory Structure (Pending)
+### 6. Directory Structure (Deferred)
 
-- [ ] Organize for library distribution
-- [ ] Entry points and exports
+- [x] Keep current flat structure for now
+- [x] Create index.ts entry point only
+- [ ] Defer restructuring until after tests are written
 
-## Phase 2: Code Architecture Improvements (Future)
+## Phase 2: Testing Infrastructure (Next Priority)
+
+- [ ] Set up Jest testing framework
+- [ ] Write unit tests for core MT63 functionality
+- [ ] Write integration tests for encode/decode workflows
+- [ ] Add test coverage reporting
+- [ ] Ensure all existing functionality is tested before refactoring
+
+## Phase 3: Code Architecture Improvements (Future - After Testing)
 
 - [ ] Unified API design
 - [ ] Class-based architecture for consistency
+- [ ] Directory restructuring (core/, dsp/, utils/, api/)
 - [ ] Import cleanup (.js extensions)
-- [ ] Type definitions
+- [ ] Type definitions improvements
 - [ ] Error handling improvements
 
-## Phase 3: Library Interface Design (Future)
+## Phase 4: Library Interface Design (After Testing)
 
 - [ ] Main entry point (index.ts)
-- [ ] Consistent naming
+- [ ] Consistent naming conventions
 - [ ] JSDoc documentation
-- [ ] Usage examples
+- [ ] Usage examples and README
 
-## Phase 4: Build and Distribution (Future)
+## Phase 5: Build and Distribution (Final)
 
 - [ ] Build pipeline
 - [ ] Testing setup (Jest)
@@ -93,4 +103,7 @@ Converting MT63 TypeScript implementation into a publishable npm library as `@ha
 - Current architecture inconsistency: MT63Client (class) vs MT63typescript (functions)
 - Import issues: .js extensions in TypeScript files
 - Need to decide on unified API structure
+- **Testing First**: Must write comprehensive tests before any restructuring/refactoring
+- Keep current file structure until tests provide safety net for changes
 - Don't say "You're absolutely right!" -- While I get the last say I would like you to push back on anything I say that doesn't follow common or best practice.
+- Commit often, possibly after ever step. When in doubt ask if we should commit the changes just made.
