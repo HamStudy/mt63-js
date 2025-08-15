@@ -85,7 +85,7 @@ Converting MT63 TypeScript implementation into a publishable npm library as `@ha
 - [ ] Create vitest.config.ts
 - [x] Create separate tsconfig.json for tests (discuss inheritance/overrides)
 - [x] Update main tsconfig.json (remove test exclusions, consider import resolution)
-- [ ] Remove .js extensions from imports in source files (modern best practice)
+- [x] Remove .js extensions from imports in source files (modern best practice)
 - [ ] Update .gitignore for vitest coverage/cache files
 - [x] Update ESLint test file rules (add vitest globals like describe, it, expect)
 - [ ] Add test script to package.json
@@ -107,7 +107,6 @@ Converting MT63 TypeScript implementation into a publishable npm library as `@ha
 - [ ] Unified API design
 - [ ] Class-based architecture for consistency
 - [ ] Directory restructuring (core/, dsp/, utils/, api/)
-- [ ] Import cleanup (.js extensions)
 - [ ] Type definitions improvements
 - [ ] Error handling improvements
 
@@ -128,8 +127,8 @@ Converting MT63 TypeScript implementation into a publishable npm library as `@ha
 
 ## Notes
 
+- When I say "notes" I refer to any `.md` file with instructions, not just this Notes section
 - Current architecture inconsistency: MT63Client (class) vs MT63typescript (functions)
-- Import issues: .js extensions in TypeScript files
 - Need to decide on unified API structure
 - **Testing First**: Must write comprehensive tests before any restructuring/refactoring
 - Keep current file structure until tests provide safety net for changes
