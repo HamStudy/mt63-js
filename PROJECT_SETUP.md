@@ -81,16 +81,17 @@ Converting MT63 TypeScript implementation into a publishable npm library as `@ha
 
 **Setup Tasks:**
 
-- [ ] Install vitest dependency
-- [ ] Create vitest.config.ts
+- [x] Install vitest dependency
+- [x] Create vitest.config.ts
 - [x] Create separate tsconfig.json for tests (discuss inheritance/overrides)
 - [x] Update main tsconfig.json (remove test exclusions, consider import resolution)
 - [x] Remove .js extensions from imports in source files (modern best practice)
-- [ ] Update .gitignore for vitest coverage/cache files
+- [x] Update .gitignore for vitest coverage/cache files
 - [x] Update ESLint test file rules (add vitest globals like describe, it, expect)
-- [ ] Add test script to package.json
-- [ ] Add build script to package.json (tsc for now, revisit bundler later)
-- [ ] Create hello world test
+- [x] Add test script to package.json
+- [x] Add build script to package.json (tsc for now, revisit bundler later)
+- [x] Create hello world test
+- [ ] Write decode integration test (with provided test data)
 - [ ] Write decode integration test (with provided test data)
 - [ ] Write unit tests for core MT63 functionality
 - [ ] Add test coverage reporting
@@ -100,6 +101,7 @@ Converting MT63 TypeScript implementation into a publishable npm library as `@ha
 - **Test file naming**: `*.test.ts` in `tests/` folder
 - **TypeScript config**: Separate tsconfig for tests to handle different needs
 - **Import extensions**: Remove .js extensions (modern tooling handles resolution)
+- **Test imports**: Explicit imports preferred over globals (no `globals: true`)
 - **Build tool**: Start with `tsc`, revisit bundler need later
 
 ## Phase 3: Code Architecture Improvements (Future - After Testing)
