@@ -17,6 +17,9 @@ lib/
 npm-debug.log*
 coverage/
 
+# Testing
+.vitest/
+
 # OS generated files
 .DS_Store*
 ._*
