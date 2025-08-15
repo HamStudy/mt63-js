@@ -66,13 +66,41 @@ Converting MT63 TypeScript implementation into a publishable npm library as `@ha
 - [x] Create index.ts entry point only
 - [ ] Defer restructuring until after tests are written
 
-## Phase 2: Testing Infrastructure (Next Priority)
+## Phase 2: Testing Infrastructure (In Progress)
 
-- [ ] Set up Jest testing framework
+**Testing Framework Choice: Vitest** ✅ (Decided)
+
+- **Framework**: Vitest (better ES modules + TypeScript support than Jest)
+- **Config**: `vitest.config.ts` in root directory
+- **Test Pattern**: `**/*.test.ts`
+- **Test Location**: `tests/` directory (sibling to src/)
+- **Environment**: Node.js (no browser APIs initially)
+- **TypeScript**: Vitest built-in TypeScript support
+- **Coverage**: Default (v8)
+- **UI Package**: Skip @vitest/ui for now (optional web dashboard)
+
+**Setup Tasks:**
+
+- [ ] Install vitest dependency
+- [ ] Create vitest.config.ts
+- [ ] Create separate tsconfig.json for tests (discuss inheritance/overrides)
+- [ ] Update main tsconfig.json (remove test exclusions, consider import resolution)
+- [ ] Remove .js extensions from imports in source files (modern best practice)
+- [ ] Update .gitignore for vitest coverage/cache files
+- [ ] Update ESLint test file rules (add vitest globals like describe, it, expect)
+- [ ] Add test script to package.json
+- [ ] Add build script to package.json (tsc for now, revisit bundler later)
+- [ ] Create hello world test
+- [ ] Write decode integration test (with provided test data)
 - [ ] Write unit tests for core MT63 functionality
-- [ ] Write integration tests for encode/decode workflows
 - [ ] Add test coverage reporting
-- [ ] Ensure all existing functionality is tested before refactoring
+
+**Testing Configuration Notes:**
+
+- **Test file naming**: `*.test.ts` in `tests/` folder
+- **TypeScript config**: Separate tsconfig for tests to handle different needs
+- **Import extensions**: Remove .js extensions (modern tooling handles resolution)
+- **Build tool**: Start with `tsc`, revisit bundler need later
 
 ## Phase 3: Code Architecture Improvements (Future - After Testing)
 
@@ -107,3 +135,4 @@ Converting MT63 TypeScript implementation into a publishable npm library as `@ha
 - Keep current file structure until tests provide safety net for changes
 - Don't say "You're absolutely right!" -- While I get the last say I would like you to push back on anything I say that doesn't follow common or best practice.
 - Commit often, possibly after ever step. When in doubt ask if we should commit the changes just made.
+- timeout is not a command, don't try to use it
