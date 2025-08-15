@@ -31,7 +31,12 @@ export default tseslint.config([
   },
   {
     // Test file exceptions
-    files: ['**/*.test.{js,ts}', '**/*.spec.{js,ts}'],
+    files: ['**/*.test.{js,ts}'],
+    languageOptions: {
+      parserOptions: {
+        project: './tsconfig.test.json',
+      },
+    },
     rules: {
       'no-console': 'off',
       '@typescript-eslint/no-explicit-any': 'off',

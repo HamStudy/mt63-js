@@ -83,11 +83,11 @@ Converting MT63 TypeScript implementation into a publishable npm library as `@ha
 
 - [ ] Install vitest dependency
 - [ ] Create vitest.config.ts
-- [ ] Create separate tsconfig.json for tests (discuss inheritance/overrides)
-- [ ] Update main tsconfig.json (remove test exclusions, consider import resolution)
+- [x] Create separate tsconfig.json for tests (discuss inheritance/overrides)
+- [x] Update main tsconfig.json (remove test exclusions, consider import resolution)
 - [ ] Remove .js extensions from imports in source files (modern best practice)
 - [ ] Update .gitignore for vitest coverage/cache files
-- [ ] Update ESLint test file rules (add vitest globals like describe, it, expect)
+- [x] Update ESLint test file rules (add vitest globals like describe, it, expect)
 - [ ] Add test script to package.json
 - [ ] Add build script to package.json (tsc for now, revisit bundler later)
 - [ ] Create hello world test
@@ -134,5 +134,5 @@ Converting MT63 TypeScript implementation into a publishable npm library as `@ha
 - **Testing First**: Must write comprehensive tests before any restructuring/refactoring
 - Keep current file structure until tests provide safety net for changes
 - Don't say "You're absolutely right!" -- While I get the last say I would like you to push back on anything I say that doesn't follow common or best practice.
-- Commit often, possibly after ever step. When in doubt ask if we should commit the changes just made.
+- Commit often, possibly after ever step. When in doubt ask if we should commit the changes just made. Unless there is a good reason to add more, keep commit messages to one line. Describing what is changed in the commit message isn't helpful as someone can see this by the changes themselves. Writing a message that describes the reason for the change is more helpful.
 - timeout is not a command, don't try to use it
