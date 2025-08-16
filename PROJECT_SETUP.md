@@ -110,6 +110,8 @@ Converting MT63 TypeScript implementation into a publishable npm library as `@ha
 - [ ] Directory restructuring (core/, dsp/, utils/, api/)
 - [ ] Type definitions improvements
 - [ ] Error handling improvements
+- [ ] Audit and migrate to typed arrays for performance (Float32Array, Float64Array, Int32Array, etc.)
+- [ ] Optimize typed array usage (subarray() vs slice(), buffer reuse, minimize allocations)
 
 ## Phase 4: Library Interface Design (After Testing)
 
