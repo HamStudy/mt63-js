@@ -92,7 +92,7 @@ Converting MT63 TypeScript implementation into a publishable npm library as `@ha
 - [x] Add build script to package.json (tsc for now, revisit bundler later)
 - [x] Create hello world test
 - [x] Write decode integration test (with provided test data)
-- [ ] Write unit tests for core MT63 functionality
+- [x] Write unit tests for core MT63 functionality
 - [ ] Add test coverage reporting
 
 **Testing Configuration Notes:**
