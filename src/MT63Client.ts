@@ -69,15 +69,12 @@ export class MT63Client {
     }
   }
 
-  encodeString(
+  encodeToSamples(
     text: string,
     bandwidth: number,
-    longInterleave: boolean,
-    audioCtx: AudioContext
+    longInterleave: boolean
   ): {
-    source: AudioBufferSourceNode;
-    buffer: AudioBuffer;
-    length: number;
+    samples: Float32Array;
     sampleRate: number;
   } {
     if (bandwidth !== 500 && bandwidth !== 1000 && bandwidth !== 2000) {
@@ -89,7 +86,6 @@ export class MT63Client {
     this.TX.preset(1500, bandwidth, longInterleave);
     this.sendTone(2, bandwidth);
 
-    // console.log(`Sending string: ${text}`);
     for (const curChar of text) {
       let charCode = curChar.charCodeAt(0);
       // MT63 can only encode characters 0-127 (128 total)
@@ -110,15 +106,31 @@ export class MT63Client {
     this.TX.SendJam();
     this.flushToBuffer();
 
-    const audioBuffer = audioCtx.createBuffer(
-      1,
-      this.dataSize,
-      this.sampleRate
+    return {
+      samples: new Float32Array(this.sourceBuffer.subarray(0, this.dataSize)),
+      sampleRate: this.sampleRate,
+    };
+  }
+
+  encodeString(
+    text: string,
+    bandwidth: number,
+    longInterleave: boolean,
+    audioCtx: AudioContext
+  ): {
+    source: AudioBufferSourceNode;
+    buffer: AudioBuffer;
+    length: number;
+    sampleRate: number;
+  } {
+    const { samples, sampleRate } = this.encodeToSamples(
+      text,
+      bandwidth,
+      longInterleave
     );
-    audioBuffer.copyToChannel(
-      new Float32Array(this.sourceBuffer.subarray(0, this.dataSize)),
-      0
-    );
+
+    const audioBuffer = audioCtx.createBuffer(1, samples.length, sampleRate);
+    audioBuffer.copyToChannel(samples, 0);
 
     const source = audioCtx.createBufferSource();
     source.buffer = audioBuffer;
@@ -127,8 +139,8 @@ export class MT63Client {
     return {
       source,
       buffer: audioBuffer,
-      length: this.sourceBuffer.length,
-      sampleRate: this.sampleRate,
+      length: samples.length,
+      sampleRate,
     };
   }
 
