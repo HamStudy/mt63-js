@@ -1,29 +1,29 @@
-import { DspSeq } from './dsp';
+import { DspSeq, dspCmpx } from './dsp';
 
-export class DspDelayLine<T> {
-  public line: T[] = []; // line storage
+export class DspDelayLine {
+  public line: dspCmpx[] = []; // line storage
   public dspDelay: number; // how many (at least) backward samples are stored
   public lineSize: number; // allocated size
   public dataLen: number; // length of the valid data
-  public inpPtr: T[]; // The line array (in C++ this is a pointer into line)
-  public inpOffset: number = 0; // offset into line for the most recent input
+  public inpPtr: dspCmpx[]; // The line array (in C++ this is a pointer into line)
+  public inpOffset = 0; // offset into line for the most recent input
   public inpLen: number; // number of samples for the most recent input
 
-  constructor(maxDspDelay: number, maxSize: number = 0) {
+  constructor(maxDspDelay: number, maxSize = 0) {
     this.lineSize = maxSize;
     if (this.lineSize < 2 * maxDspDelay) {
       this.lineSize = 2 * maxDspDelay;
     }
     this.dataLen = maxDspDelay;
     this.dspDelay = maxDspDelay;
-    this.line = new Array<T>(this.lineSize);
+    this.line = new Array<dspCmpx>(this.lineSize);
     this.clearArray(this.line, this.lineSize);
     this.inpOffset = this.dataLen;
     this.inpPtr = this.line; // In TypeScript, we'll use the whole array with offset
     this.inpLen = 0;
   }
 
-  public process(inp: T[], len: number): number {
+  public process(inp: dspCmpx[], len: number): number {
     if (this.dataLen + len > this.lineSize) {
       this.moveArray(
         this.line,
@@ -47,25 +47,25 @@ export class DspDelayLine<T> {
     return 0;
   }
 
-  public processSeq(input: DspSeq<T>): number {
+  public processSeq(input: DspSeq<dspCmpx>): number {
     return this.process(input.data, input.len);
   }
 
-  private clearArray(arr: T[], size: number): void {
+  private clearArray(arr: dspCmpx[], size: number): void {
     for (let i = 0; i < size; i++) {
       // Initialize with {re: 0, im: 0} for complex numbers
       // This assumes T is dspCmpx when used with MT63rx
-      arr[i] = { re: 0, im: 0 } as any;
+      arr[i] = { re: 0, im: 0 };
     }
   }
 
-  private copyArray(dest: T[], src: T[], len: number): void {
+  private copyArray(dest: dspCmpx[], src: dspCmpx[], len: number): void {
     for (let i = 0; i < len; i++) {
       dest[i] = src[i];
     }
   }
 
-  private moveArray(dest: T[], src: T[], len: number): void {
+  private moveArray(dest: dspCmpx[], src: dspCmpx[], len: number): void {
     for (let i = 0; i < len; i++) {
       dest[i] = src[i];
     }

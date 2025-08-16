@@ -1,17 +1,13 @@
-import { dspCmpx, DspCmpxBuff } from './dsp';
+import { DspCmpxBuff, dspCmpx } from './dsp';
 
 export class dspCmpxOverlapWindow {
   public Output: DspCmpxBuff = new DspCmpxBuff();
 
-  private Len: number = 0;
+  private Len = 0;
   private Buff: dspCmpx[] = [];
-  private Dist: number = 0;
+  private Dist = 0;
   private Window: number[] | null = null;
-  private ExternWindow: boolean = true;
-
-  constructor() {
-    // Initialize class properties
-  }
+  private ExternWindow = true;
 
   free(): void {
     // Free method implementation

@@ -2,25 +2,24 @@ import { DataCarrSepar, SymbolLen, SymbolSepar, SymbolShape } from './Symbol';
 import { dsp_r2FFT } from './FFT';
 import { DspQuadrSplit } from './QuadrSplit';
 import {
-  dspCmpx,
-  dspLowPass2,
-  dspLowPass2Coeff,
-  dspPower,
-  dspWindowBlackman3,
   dspAmpl,
-  dspPhase,
-  dspScalProd,
-  dspFindMaxPower,
-  dspSelFitAver,
+  dspCmpx,
   dspCmpxMult,
   dspCmpxMultConj,
+  dspFindMaxPower,
+  dspLowPass2,
+  dspLowPass2Coeff,
+  dspPhase,
+  dspPower,
+  dspScalProd,
+  dspSelFitAver,
+  dspWindowBlackman3,
 } from './dsp';
 import { DspCmpxMixer } from './dspCmpxMixer';
 import { DspDelayLine } from './DspDelayLine';
 import { longInterleavePattern, shortInterleavePattern } from './mt63intl';
 import { MT63decoder } from './MT63Decoder';
 
-const desiredSampleRate = 8000;
 const SYMBOL_DIV = 4;
 const DataCarriers = 64;
 
@@ -31,16 +30,16 @@ export class MT63rx {
   private resampleBuffer?: Float32Array;
 
   Decoder!: MT63decoder;
-  private FirstDataCarr: number = 0;
-  private AliasFilterLen: number = 0;
-  private DecimateRatio: number = 0;
+  private FirstDataCarr = 0;
+  private AliasFilterLen = 0;
+  private DecimateRatio = 0;
   private WindowLen = SymbolLen;
   private WindowLenMask = this.WindowLen - 1;
   private RxWindow = SymbolShape;
   private FFT = new dsp_r2FFT(this.WindowLen);
   private InpSplit!: DspQuadrSplit;
   private TestOfs!: DspCmpxMixer;
-  private ProcLine!: DspDelayLine<dspCmpx>;
+  private ProcLine!: DspDelayLine;
   private SpectradspPower!: Float64Array;
 
   SyncPipe: dspCmpx[][] = [];
@@ -79,18 +78,18 @@ export class MT63rx {
 
   // Additional properties for synchronization
   SyncStep!: number;
-  SymbPtr: number = 0;
-  SyncLocked: number = 0;
-  SyncSymbConf: number = 0.0;
-  SyncFreqOfs: number = 0.0;
-  SyncFreqDev: number = 0.0;
-  SyncSymbShift: number = 0.0;
+  SymbPtr = 0;
+  SyncLocked = 0;
+  SyncSymbConf = 0.0;
+  SyncFreqOfs = 0.0;
+  SyncFreqDev = 0.0;
+  SyncSymbShift = 0.0;
 
   // Tracking pipes
   SymbPipe!: dspCmpx[];
   FreqPipe!: Float64Array;
   TrackPipeLen!: number;
-  TrackPipePtr: number = 0;
+  TrackPipePtr = 0;
 
   // Symbol fitting
   SymbFit!: dspCmpx[];
@@ -98,7 +97,7 @@ export class MT63rx {
 
   // Averages
   AverSymb: dspCmpx = new dspCmpx(0, 0);
-  AverFreq: number = 0;
+  AverFreq = 0;
 
   // Thresholds
   SyncHoldThres!: number;
@@ -125,7 +124,7 @@ export class MT63rx {
   Output: { Data: number[]; Len: number } = { Data: [], Len: 0 };
 
   // Character escape handling (for characters > 127)
-  private escape: number = 0;
+  private escape = 0;
 
   // Process delay
   ProcdspDelay!: number;
@@ -140,7 +139,7 @@ export class MT63rx {
     LongInterleave: boolean,
     IntegLen: number,
     SpectraDisplay?: (spectra: Float64Array, len: number) => void
-  ) {
+  ): void {
     const hbw = (1.5 * BandWidth) / 2;
     let omega_low = centerFrequency - hbw;
     let omega_high = centerFrequency + hbw;
@@ -177,9 +176,7 @@ export class MT63rx {
         break;
       default:
         throw new Error(
-          'Invalid bandwidth: ' +
-            BandWidth +
-            ' Valid values are 500, 1000, and 2000'
+          `Invalid bandwidth: ${BandWidth} Valid values are 500, 1000, and 2000`
         );
     }
 
@@ -219,7 +216,7 @@ export class MT63rx {
     this.TestOfs = new DspCmpxMixer();
     this.TestOfs.preset(-0.25 * ((2.0 * Math.PI) / this.WindowLen)); // for decoder tests only
 
-    this.ProcLine = new DspDelayLine<dspCmpx>(
+    this.ProcLine = new DspDelayLine(
       this.ProcdspDelay + this.WindowLen + SymbolSepar
     ); // @TODO IS THIS CORRECT?
     // this.ProcLine.Preset(this.ProcdspDelay + this.WindowLen + SymbolSepar);
@@ -362,9 +359,6 @@ export class MT63rx {
   }
 
   Process(input: Float32Array): void {
-    let s1: number;
-    let s2: number;
-
     // TestOfs.Omega += (-0.005 * (2.0 * Math.PI / 512)); // simulate frequency drift
 
     this.Output.Len = 0;
@@ -443,8 +437,8 @@ export class MT63rx {
     this.DataProcPtr -= this.ProcLine.inpLen;
   }
 
-  DoCorrelSum(Correl1: dspCmpx[], Correl2: dspCmpx[], Aver: dspCmpx[]) {
-    let sx = new dspCmpx(0, 0);
+  DoCorrelSum(Correl1: dspCmpx[], Correl2: dspCmpx[], Aver: dspCmpx[]): void {
+    const sx = new dspCmpx(0, 0);
 
     const s = 2 * DataCarrSepar;
     const d = DataCarriers * DataCarrSepar;
@@ -472,20 +466,17 @@ export class MT63rx {
     }
   }
 
-  SyncProcess(Slice: dspCmpx[]) {
+  SyncProcess(Slice: dspCmpx[]): void {
     let i: number, j: number, k: number, r: number, s: number, s2: number;
     let pI: number, pQ: number;
-    let Correl: dspCmpx = new dspCmpx(0, 0);
-    let PrevSlice: dspCmpx[];
+    const Correl: dspCmpx = new dspCmpx(0, 0);
     let I: number, Q: number;
     let dI: number, dQ: number;
     let P: number, A: number;
     let w0: number, w1: number;
     let Fl: number, F0: number, Fu: number;
-    let SymbTime: dspCmpx = new dspCmpx(0, 0);
+    const SymbTime: dspCmpx = new dspCmpx(0, 0);
     let SymbConf: number, SymbShift: number, FreqOfs: number;
-    let rms: number;
-    let sel: number;
 
     this.SyncPtr = (this.SyncPtr + 1) & (SYMBOL_DIV - 1); // increment the correlators pointer
 
@@ -522,7 +513,7 @@ export class MT63rx {
     }
 
     // Process correlation with previous slice
-    PrevSlice = this.SyncPipe[this.SyncPtr];
+    const PrevSlice: dspCmpx[] = this.SyncPipe[this.SyncPtr];
     for (i = 0; i < this.ScanLen; i++) {
       k = (this.ScanFirst + i) & this.WindowLenMask;
       I = this.FFTbuff[k].re;
@@ -615,8 +606,11 @@ export class MT63rx {
 
       // Adjust position to stay within carrier range
       k = Math.trunc((j - this.SymbFitPos) / DataCarrSepar);
-      if (k > 1) j -= (k - 1) * DataCarrSepar;
-      else if (k < -1) j -= (k + 1) * DataCarrSepar;
+      if (k > 1) {
+        j -= (k - 1) * DataCarrSepar;
+      } else if (k < -1) {
+        j -= (k + 1) * DataCarrSepar;
+      }
       this.SymbFitPos = j;
 
       if (P > 0.0) {
@@ -638,7 +632,9 @@ export class MT63rx {
 
         // Calculate symbol shift
         SymbShift = (dspPhase(SymbTime) / (2 * Math.PI)) * SYMBOL_DIV;
-        if (SymbShift < 0) SymbShift += SYMBOL_DIV;
+        if (SymbShift < 0) {
+          SymbShift += SYMBOL_DIV;
+        }
 
         // First estimation of frequency offset
         pI =
@@ -664,9 +660,11 @@ export class MT63rx {
         F0 = i + (dspPhase(I, Q) / (2.0 * Math.PI)) * A - FreqOfs;
         Fl = F0 - A;
         Fu = F0 + A;
-        if (Math.abs(Fl) < Math.abs(F0))
+        if (Math.abs(Fl) < Math.abs(F0)) {
           FreqOfs += Math.abs(Fu) < Math.abs(Fl) ? Fu : Fl;
-        else FreqOfs += Math.abs(Fu) < Math.abs(F0) ? Fu : F0;
+        } else {
+          FreqOfs += Math.abs(Fu) < Math.abs(F0) ? Fu : F0;
+        }
       } else {
         SymbTime.re = SymbTime.im = 0.0;
         SymbConf = 0.0;
@@ -696,9 +694,11 @@ export class MT63rx {
         F0 = FreqOfs - this.AverFreq;
         Fl = F0 - A;
         Fu = F0 + A;
-        if (Math.abs(Fl) < Math.abs(F0))
+        if (Math.abs(Fl) < Math.abs(F0)) {
           FreqOfs += Math.abs(Fu) < Math.abs(Fl) ? A : -A;
-        else FreqOfs += Math.abs(Fu) < Math.abs(F0) ? A : 0.0;
+        } else {
+          FreqOfs += Math.abs(Fu) < Math.abs(F0) ? A : 0.0;
+        }
       } else {
         // Flip SymbTime if it doesn't agree with previous
         if (
@@ -718,15 +718,18 @@ export class MT63rx {
         F0 = FreqOfs - this.FreqPipe[this.TrackPipePtr];
         Fl = F0 - A;
         Fu = F0 + A;
-        if (Math.abs(Fl) < Math.abs(F0))
+        if (Math.abs(Fl) < Math.abs(F0)) {
           FreqOfs += Math.abs(Fu) < Math.abs(Fl) ? A : -A;
-        else FreqOfs += Math.abs(Fu) < Math.abs(F0) ? A : 0.0;
+        } else {
+          FreqOfs += Math.abs(Fu) < Math.abs(F0) ? A : 0.0;
+        }
       }
 
       // Update tracking pipes
       this.TrackPipePtr += 1;
-      if (this.TrackPipePtr >= this.TrackPipeLen)
+      if (this.TrackPipePtr >= this.TrackPipeLen) {
         this.TrackPipePtr -= this.TrackPipeLen;
+      }
       this.SymbPipe[this.TrackPipePtr] = SymbTime;
       this.FreqPipe[this.TrackPipePtr] = FreqOfs;
 
@@ -756,21 +759,30 @@ export class MT63rx {
 
       if (SymbConf > 0.0) {
         SymbShift = (dspPhase(this.AverSymb) / (2 * Math.PI)) * SymbolSepar;
-        if (SymbShift < 0.0) SymbShift += SymbolSepar;
+        if (SymbShift < 0.0) {
+          SymbShift += SymbolSepar;
+        }
         this.SymbPtr = Math.floor(
           (dspPhase(this.AverSymb) / (2 * Math.PI)) * SYMBOL_DIV
         );
-        if (this.SymbPtr < 0) this.SymbPtr += SYMBOL_DIV;
+        if (this.SymbPtr < 0) {
+          this.SymbPtr += SYMBOL_DIV;
+        }
         this.SyncSymbShift = SymbShift;
       }
 
       // Update lock status
       if (this.SyncLocked) {
-        if (this.SyncSymbConf < this.SyncHoldThres || this.SyncFreqDev > 0.25)
+        if (this.SyncSymbConf < this.SyncHoldThres || this.SyncFreqDev > 0.25) {
           this.SyncLocked = 0;
+        }
       } else {
-        if (this.SyncSymbConf > this.SyncLockThres && this.SyncFreqDev < 0.125)
+        if (
+          this.SyncSymbConf > this.SyncLockThres &&
+          this.SyncFreqDev < 0.125
+        ) {
           this.SyncLocked = 1;
+        }
       }
 
       this.SyncSymbConf *= 0.5;
@@ -782,11 +794,11 @@ export class MT63rx {
     OddSlice: dspCmpx[],
     FreqOfs: number,
     TimeDist: number
-  ) {
+  ): void {
     let i: number, c: number, r: number;
     let Freq: dspCmpx, Phas: dspCmpx;
-    let incr: number, p: number;
-    let I: number, Q: number, P: number;
+    let p: number;
+    let P: number;
     let Dtmp: dspCmpx;
     let Ftmp: dspCmpx;
 
@@ -827,7 +839,7 @@ export class MT63rx {
     this.FFT.coreProc(this.FFTbuff2);
 
     // Step 3: Extract data carriers and perform differential phase decoding
-    incr = (TimeDist * DataCarrSepar) & this.WindowLenMask;
+    const incr = (TimeDist * DataCarrSepar) & this.WindowLenMask;
     p = (TimeDist * this.DataScanFirst) & this.WindowLenMask;
 
     // Store current FFT values in temporary array to update RefDataSlice AFTER processing
@@ -915,8 +927,11 @@ export class MT63rx {
     for (i = 0; i < this.DataScanLen; i++) {
       if (this.DataPwrOut[i] > 0.0) {
         P = this.DataVect[i].re / this.DataPwrOut[i];
-        if (P > 1.0) P = 1.0;
-        else if (P < -1.0) P = -1.0;
+        if (P > 1.0) {
+          P = 1.0;
+        } else if (P < -1.0) {
+          P = -1.0;
+        }
         this.DatadspPhase[i] = P;
       } else {
         this.DatadspPhase[i] = 0.0;
@@ -929,7 +944,7 @@ export class MT63rx {
     this.Output.Len++;
   }
 
-  FEC_SNR() {
+  FEC_SNR(): number {
     return this.Decoder.SignalToNoise;
   }
 }

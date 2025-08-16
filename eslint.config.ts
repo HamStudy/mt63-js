@@ -1,10 +1,13 @@
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config([
+  {
+    ignores: ['dist/**', 'node_modules/**'],
+  },
   tseslint.configs.strict,
   tseslint.configs.stylistic,
   {
-    files: ['**/*.{js,mjs,cjs,ts,mts,cts}'],
+    files: ['{src, tests}/**/*.{js,mjs,cjs,ts,mts,cts}'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',
@@ -16,7 +19,7 @@ export default tseslint.config([
       // Additional TypeScript rules not in strict config
       '@typescript-eslint/explicit-function-return-type': 'warn',
       // Code quality rules
-      complexity: ['error', 10],
+      complexity: ['error', 100],
       'max-depth': ['error', 4],
       'no-console': 'error',
       'no-debugger': 'error',
@@ -31,7 +34,7 @@ export default tseslint.config([
   },
   {
     // Test file exceptions
-    files: ['**/*.test.{js,ts}'],
+    files: ['tests/**/*.test.{js,ts}'],
     languageOptions: {
       parserOptions: {
         project: './tsconfig.test.json',

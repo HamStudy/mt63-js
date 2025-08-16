@@ -1,5 +1,3 @@
-// tslint:disable max-classes-per-file
-
 export function dspWindowBlackman3(dspPhase: number): number {
   return (
     0.35875 +
@@ -31,7 +29,7 @@ export function dspPowerOf2(n: number): boolean {
 // }
 
 export class DspSeq<T> {
-  len: number = 0;
+  len = 0;
   data: T[] = [];
 
   ensureSpace(reqSpace: number): void {
@@ -55,7 +53,7 @@ export function dspWinFirI(
   shape: number[],
   len: number,
   window: (arg: number) => number,
-  shift: number = 0
+  shift = 0
 ): void {
   let i: number;
   let time: number;
@@ -82,7 +80,7 @@ export function winFirQ(
   shape: number[],
   len: number,
   window: (arg: number) => number,
-  shift: number = 0
+  shift = 0
 ): void {
   let i: number;
   let time: number;
@@ -112,8 +110,8 @@ export function dspWalshTrans(
   for (let step = 1; step < Len; step *= 2) {
     for (let ptr = 0; ptr < Len; ptr += 2 * step) {
       for (let ptr2 = ptr; ptr2 - ptr < step; ptr2 += 1) {
-        let bit1 = Data[ptr2];
-        let bit2 = Data[ptr2 + step];
+        const bit1 = Data[ptr2];
+        const bit2 = Data[ptr2 + step];
         Data[ptr2] = bit1 + bit2;
         Data[ptr2 + step] = bit2 - bit1;
       }
@@ -124,8 +122,8 @@ export function dspWalshInvTrans(data: number[], len: number): void {
   for (let step = len / 2; step >= 1; step /= 2) {
     for (let ptr = 0; ptr < len; ptr += 2 * step) {
       for (let ptr2 = ptr; ptr2 - ptr < step; ptr2 += 1) {
-        let bit1 = data[ptr2];
-        let bit2 = data[ptr2 + step];
+        const bit1 = data[ptr2];
+        const bit2 = data[ptr2 + step];
         data[ptr2] = bit1 - bit2;
         data[ptr2 + step] = bit1 + bit2;
       }
@@ -275,7 +273,7 @@ export function dspPower(
   if ('re' in x) {
     return x.re * x.re + x.im * x.im;
   }
-  let len = typeof y === 'number' ? y : (z as number);
+  const len = typeof y === 'number' ? y : (z as number);
   let sum = 0;
   for (let i = 0; i < len; i++) {
     const itemX = x[i];
@@ -295,7 +293,7 @@ export function dspCopyArray(
   source: number[] | Float32Array,
   destination: number[] | Float32Array,
   destinationOffset: number
-) {
+): void {
   if (destination instanceof Float32Array) {
     destination.set(source, destinationOffset);
   } else {
@@ -315,7 +313,7 @@ export function dspPhase(xOrRe: dspCmpx | number, im?: number): number {
   if (typeof xOrRe === 'object') {
     return Math.atan2(xOrRe.im, xOrRe.re);
   }
-  return Math.atan2(im!, xOrRe);
+  return Math.atan2(im!, xOrRe); // eslint-disable-line @typescript-eslint/no-non-null-assertion
 }
 
 export function dspScalProd(x1: dspCmpx, x2: dspCmpx): number;
@@ -432,7 +430,9 @@ export function dspSelFitAver(
           sel++;
         }
       }
-      if (sel > 0) aver = sum / sel;
+      if (sel > 0) {
+        aver = sum / sel;
+      }
     } else {
       sumRe = 0;
       sumIm = 0;

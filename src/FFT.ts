@@ -1,8 +1,7 @@
 import { dspCmpx } from './dsp';
 
-// tslint:disable max-classes-per-file
 export class dsp_r2FFT {
-  Size: number = 0;
+  Size = 0;
   BitRevIdx: number[] = [];
   Twiddle: dspCmpx[] = [];
 
@@ -69,7 +68,7 @@ export class dsp_r2FFT {
 
   separTwoReals(Buff: dspCmpx[], Out0: dspCmpx[], Out1: dspCmpx[]): void {
     let idx: number;
-    let HalfSize = this.Size / 2;
+    const HalfSize = this.Size / 2;
 
     Out0[0].re = Buff[0].re;
     Out1[0].re = Buff[0].im;
@@ -87,7 +86,7 @@ export class dsp_r2FFT {
 
   joinTwoReals(Inp0: dspCmpx[], Inp1: dspCmpx[], Buff: dspCmpx[]): void {
     let idx: number;
-    let HalfSize = this.Size / 2;
+    const HalfSize = this.Size / 2;
 
     Buff[0].re = 2 * Inp0[0].re;
     Buff[0].im = -2 * Inp1[0].re;
@@ -135,7 +134,7 @@ export class dsp_r2FFT {
 
   // Private methods
   private FFTbf(x0: dspCmpx, x1: dspCmpx, W: dspCmpx): void {
-    let x1W: dspCmpx = { re: 0, im: 0 };
+    const x1W: dspCmpx = { re: 0, im: 0 };
     x1W.re = x1.re * W.re + x1.im * W.im;
     x1W.im = -x1.re * W.im + x1.im * W.re;
     x1.re = x0.re - x1W.re;
@@ -145,7 +144,7 @@ export class dsp_r2FFT {
   }
 
   private FFT2(x0: dspCmpx, x1: dspCmpx): void {
-    let x1W: dspCmpx = { re: x1.re, im: x1.im };
+    const x1W: dspCmpx = { re: x1.re, im: x1.im };
     x1.re = x0.re - x1.re;
     x1.im = x0.im - x1.im;
     x0.re += x1W.re;
@@ -153,7 +152,7 @@ export class dsp_r2FFT {
   }
 
   private FFT4(x0: dspCmpx, x1: dspCmpx, x2: dspCmpx, x3: dspCmpx): void {
-    let x1W: dspCmpx = { re: x2.re, im: x2.im };
+    const x1W: dspCmpx = { re: x2.re, im: x2.im };
     x2.re = x0.re - x1W.re;
     x2.im = x0.im - x1W.im;
     x0.re += x1W.re;

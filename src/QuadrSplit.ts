@@ -1,17 +1,17 @@
-import { dspCmpx, dspWinFirI, winFirQ, dspWindowBlackman3 } from './dsp';
+import { dspCmpx, dspWinFirI, dspWindowBlackman3, winFirQ } from './dsp';
 
 /**
  * Quadrature splitter that converts real-valued input signal to complex I/Q output
  * by applying FIR filters and decimation.
  */
 export class DspQuadrSplit {
-  private len: number = 0;
+  private len = 0;
   private tap: Float32Array = new Float32Array(0);
-  private tapLen: number = 0;
+  private tapLen = 0;
   private shapeI?: Float64Array;
   private shapeQ?: Float64Array;
-  private externShape: boolean = true;
-  private rate: number = 1;
+  private externShape = true;
+  private rate = 1;
 
   preset(
     filterLen: number,

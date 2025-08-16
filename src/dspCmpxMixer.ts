@@ -1,8 +1,8 @@
-import { dspCmpx, DspCmpxBuff } from './dsp';
+import { DspCmpxBuff, dspCmpx } from './dsp';
 
 export class DspCmpxMixer {
-  public dspPhase: number = 0;
-  public omega: number = 0;
+  public dspPhase = 0;
+  public omega = 0;
   public output: DspCmpxBuff = new DspCmpxBuff();
 
   free(): void {
@@ -32,15 +32,9 @@ export class DspCmpxMixer {
 
   processFast(inp: dspCmpx[], inpLen: number, out: dspCmpx[]): number {
     let i: number;
-    let dI: number,
-      dQ: number,
-      I: number,
-      Q: number,
-      nI: number,
-      nQ: number,
-      N: number;
-    dI = Math.cos(this.omega);
-    dQ = Math.sin(this.omega);
+    let I: number, Q: number, nI: number, nQ: number;
+    const dI = Math.cos(this.omega);
+    const dQ = Math.sin(this.omega);
     I = Math.cos(this.dspPhase);
     Q = Math.sin(this.dspPhase);
     for (i = 0; i < inpLen; i++) {
@@ -52,7 +46,7 @@ export class DspCmpxMixer {
       Q = nQ;
     }
     this.dspPhase += inpLen * this.omega;
-    N = Math.floor(this.dspPhase / (2 * Math.PI));
+    const N = Math.floor(this.dspPhase / (2 * Math.PI));
     this.dspPhase -= N * 2 * Math.PI;
     return inpLen;
   }

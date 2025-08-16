@@ -11,14 +11,14 @@ export class MT63tx {
   public DataInterleave: 64 | 32 = 32;
   public Comb: DspQuadrComb = new DspQuadrComb();
 
-  private DataCarriers: number = 0;
-  private FirstDataCarr: number = 0;
+  private DataCarriers = 0;
+  private FirstDataCarr = 0;
   private WindowLen = SymbolLen;
   private TxWindow = SymbolShape; // This is a Float64Array constant
-  private AliasFilterLen: number = 0;
-  private DecimateRatio: number = 0;
+  private AliasFilterLen = 0;
+  private DecimateRatio = 0;
   private InterleavePattern: readonly number[] = shortInterleavePattern;
-  private TxAmpl: number = 0;
+  private TxAmpl = 0;
   // private CarrMarkCode: number;
   // private CarrMarkAmpl: number;
   private Encoder!: MT63Encoder;
@@ -30,7 +30,7 @@ export class MT63tx {
   private txmixer: DspCmpxMixer = new DspCmpxMixer();
   private Window = new dspCmpxOverlapWindow();
 
-  constructor(bandwidth: number = 1000, interleave: 0 | 1 = 0) {
+  constructor(bandwidth = 1000, interleave: 0 | 1 = 0) {
     const freq = 1500; // Default center frequency
     const longInterleave = interleave === 1;
     this.preset(freq, bandwidth, longInterleave);
@@ -48,8 +48,8 @@ export class MT63tx {
 
   public preset(
     freq: number,
-    BandWidth: number = 1000,
-    LongInterleave: boolean = false
+    BandWidth = 1000,
+    LongInterleave = false
   ): boolean {
     // values used to computer the blackman3 passband filter shape
     const hbw = (1.5 * BandWidth) / 2;
@@ -64,7 +64,7 @@ export class MT63tx {
     omega_low *= Math.PI / 4000;
     omega_high *= Math.PI / 4000;
 
-    let mask = this.FFT.Size - 1;
+    const mask = this.FFT.Size - 1;
     this.DataCarriers = 64;
 
     switch (BandWidth) {
@@ -148,7 +148,7 @@ export class MT63tx {
     // compute dspPhase correction between successive FFTs separated by SymbolSepar
     // Like above we compute indexes to the FFT.Twiddle[]
 
-    let incr = (SymbolSepar * DataCarrSepar) & mask;
+    const incr = (SymbolSepar * DataCarrSepar) & mask;
     for (
       let p = (SymbolSepar * this.FirstDataCarr) & mask, i = 0;
       i < this.DataCarriers;
@@ -166,10 +166,8 @@ export class MT63tx {
     // The peridocity of the FFT is taken advantage of by computing the positions
     // of the bit indices modulo FFT.size, i.e. r = FFT.BitRevIdx[c &  (FFT.Size - 1)]
 
-    let Ampl;
-
-    let mask = this.FFT.Size - 1;
-    Ampl = this.TxAmpl * Math.sqrt(this.DataCarriers / 2);
+    const mask = this.FFT.Size - 1;
+    const Ampl = this.TxAmpl * Math.sqrt(this.DataCarriers / 2);
 
     for (let i = 0; i < this.DataCarriers; i++) {
       this.TxVect[i] = (this.TxVect[i] + this.dspPhaseCorr[i]) & mask;
@@ -229,8 +227,8 @@ export class MT63tx {
     // here we encode the encodedOutput into dspPhase flips
 
     // console.log('FFT size: ' + this.FFT.Size, this.TxVect, this.dspPhaseCorr);
-    let mask = this.FFT.Size - 1;
-    let flip = this.FFT.Size / 2;
+    const mask = this.FFT.Size - 1;
+    const flip = this.FFT.Size / 2;
     for (let i = 0; i < this.DataCarriers; i++) {
       // data bit = 1 => only dspPhase correction
       if (encodedOutput[i]) {
@@ -247,9 +245,9 @@ export class MT63tx {
   public SendJam(): void {
     let j = 0;
 
-    let mask = this.FFT.Size - 1;
-    let left = Math.floor(this.FFT.Size / 4);
-    let right = 3 * Math.floor(this.FFT.Size / 4);
+    const mask = this.FFT.Size - 1;
+    const left = Math.floor(this.FFT.Size / 4);
+    const right = 3 * Math.floor(this.FFT.Size / 4);
 
     for (let i = 0; i < this.DataCarriers; i++) {
       j = i & mask;
@@ -283,7 +281,7 @@ export class MT63tx {
       i < this.DataCarriers;
       i++, c += DataCarrSepar
     ) {
-      let r = this.FFT.BitRevIdx[c & mask] + this.WindowLen * (i & 1);
+      const r = this.FFT.BitRevIdx[c & mask] + this.WindowLen * (i & 1);
       this.WindowBuff.data[r].re =
         this.TxAmpl * this.FFT.Twiddle[this.TxVect[i]].re;
       this.WindowBuff.data[r].im =

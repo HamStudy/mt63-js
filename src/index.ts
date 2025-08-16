@@ -8,7 +8,12 @@ export function encodeString(
   bandwidth: number,
   longInterleave: boolean,
   audioCtx: AudioContext
-) {
+): {
+  source: AudioBufferSourceNode;
+  buffer: AudioBuffer;
+  length: number;
+  sampleRate: number;
+} {
   return mt63Client.encodeString(text, bandwidth, longInterleave, audioCtx);
 }
 

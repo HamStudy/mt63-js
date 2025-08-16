@@ -1,14 +1,14 @@
-import { dspPowerOf2, dspWalshInvTrans } from './dsp';
+import { dspWalshInvTrans } from './dsp';
 export class MT63encoderOld {
   public Output: boolean[] = [];
 
-  private DataCarriers: number = 0;
-  private CodeMask: number = 0;
-  private IntlvLen: number = 0;
-  private IntlvSize: number = 0;
+  private DataCarriers = 0;
+  private CodeMask = 0;
+  private IntlvLen = 0;
+  private IntlvSize = 0;
   private IntlvPatt: number[] = [];
   private IntlvPipe: boolean[] = [];
-  private IntlvPtr: number = 0;
+  private IntlvPtr = 0;
   private WalshBuff: number[] = [];
 
   public Free(): void {
@@ -21,7 +21,7 @@ export class MT63encoderOld {
     Carriers: number,
     Intlv: number,
     Pattern: number[],
-    PreFill: boolean = false
+    PreFill = false
   ): boolean {
     if (Carriers < 2 || Carriers % 2) {
       return false;
@@ -94,12 +94,11 @@ export class MT63encoderOld {
 }
 
 export class MT63Encoder {
-  // tslint:disable-line
   interleaveSize: number;
   interleavePipe: number[] = [];
 
   interleavePattern: number[] = [];
-  interleavePointer: number = 0;
+  interleavePointer = 0;
 
   constructor(
     private dataCarriers: number,

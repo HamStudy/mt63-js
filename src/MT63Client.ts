@@ -9,14 +9,14 @@ export class MT63Client {
   TONE_AMP = 0.8;
   bufferSeconds = 600;
 
-  get bufferMaxSize() {
+  get bufferMaxSize(): number {
     return this.sampleRate * this.bufferSeconds; // 8000Hz sample rate, 600 seconds (10 minutes)
   }
 
   sourceBuffer?: Float32Array;
   dataSize = 0;
 
-  ensureBufferSpace(increase: number) {
+  ensureBufferSpace(increase: number): void {
     const sourceBufferSize = this.sourceBuffer?.length || 0;
     const sizeDiff = this.dataSize + increase - sourceBufferSize;
     if (sizeDiff > 0) {
@@ -35,7 +35,7 @@ export class MT63Client {
    * The actual used size, rather than the length of the Float32Array
    * or in other words the number of bytes used.
    */
-  flushToBuffer(multiplier: number = 1.0): void {
+  flushToBuffer(multiplier = 1.0): void {
     this.ensureBufferSpace(this.TX.Comb.Output.length);
     let maxVal = 0.0;
     for (const x of this.TX.Comb.Output) {
@@ -57,12 +57,12 @@ export class MT63Client {
       if (val < -this.sigLimit) {
         val = -this.sigLimit;
       }
-      this.sourceBuffer![this.dataSize] = val;
+      this.sourceBuffer![this.dataSize] = val; // eslint-disable-line @typescript-eslint/no-non-null-assertion
       this.dataSize++;
     }
   }
 
-  interleaveFlush() {
+  interleaveFlush(): void {
     for (let i = 0; i < this.TX.DataInterleave; ++i) {
       this.TX.sendChar(String.fromCharCode(0));
       this.flushToBuffer();
@@ -74,21 +74,23 @@ export class MT63Client {
     bandwidth: number,
     longInterleave: boolean,
     audioCtx: AudioContext
-  ) {
+  ): {
+    source: AudioBufferSourceNode;
+    buffer: AudioBuffer;
+    length: number;
+    sampleRate: number;
+  } {
     if (bandwidth !== 500 && bandwidth !== 1000 && bandwidth !== 2000) {
       throw new Error('Invalid bandwidth');
     }
     this.sourceBuffer = new Float32Array();
     this.dataSize = 0;
 
-    const multiplier = Math.pow(10, this.txLevel / 20);
-    // console.log(`Using txlevel multiplier of ${multiplier}`);
-
     this.TX.preset(1500, bandwidth, longInterleave);
     this.sendTone(2, bandwidth);
 
     // console.log(`Sending string: ${text}`);
-    for (let curChar of text) {
+    for (const curChar of text) {
       let charCode = curChar.charCodeAt(0);
       // MT63 can only encode characters 0-127 (128 total)
       // For short interleave (32), we have 2*32=64 valid codes
@@ -118,7 +120,7 @@ export class MT63Client {
       0
     );
 
-    let source = audioCtx.createBufferSource();
+    const source = audioCtx.createBufferSource();
     source.playbackRate.value = 1 / 3; // why?
     source.buffer = audioBuffer;
     source.connect(audioCtx.destination);
@@ -143,18 +145,18 @@ export class MT63Client {
     this.ensureBufferSpace(numsmpls * 512);
     for (let i = 0; i < numsmpls; i++) {
       for (let j = 0; j < 512; j++) {
-        this.sourceBuffer![this.dataSize] =
+        this.sourceBuffer![this.dataSize] = // eslint-disable-line @typescript-eslint/no-non-null-assertion
           this.TONE_AMP * 0.5 * Math.cos(phi1) +
           this.TONE_AMP * 0.5 * Math.cos(phi2);
         this.dataSize++;
         phi1 += w1;
         phi2 += w2;
         if (i === 0) {
-          this.sourceBuffer![this.dataSize - 1] *=
+          this.sourceBuffer![this.dataSize - 1] *= // eslint-disable-line @typescript-eslint/no-non-null-assertion
             1.0 - Math.exp((-1.0 * j) / 40.0);
         }
         if (i === seconds - 1) {
-          this.sourceBuffer![this.dataSize - 1] *=
+          this.sourceBuffer![this.dataSize - 1] *= // eslint-disable-line @typescript-eslint/no-non-null-assertion
             1.0 - Math.exp((-1.0 * (this.sampleRate - j)) / 40.0);
         }
       }

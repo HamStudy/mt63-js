@@ -9,7 +9,7 @@ import {
 } from './dsp';
 
 export class MT63decoder {
-  public Output: number = 0; // C++ uses char but we use number
+  public Output = 0; // C++ uses char but we use number
   public SignalToNoise = 0;
   public CarrOfs = 0;
 
@@ -17,7 +17,7 @@ export class MT63decoder {
   private IntlvPipe: Float64Array; // C++ uses double*
   private IntlvLen: number;
   private IntlvSize: number;
-  private IntlvPtr: number = 0;
+  private IntlvPtr = 0;
   private IntlvPatt: Int32Array; // C++ uses int*
 
   private WalshBuff: Float64Array; // C++ uses double*
@@ -32,7 +32,7 @@ export class MT63decoder {
   private DecodePipe: Uint8Array; // C++ uses char*
   private DecodeLen: number;
   private DecodeSize: number;
-  private DecodePtr: number = 0;
+  private DecodePtr = 0;
 
   constructor(
     Carriers: number,
@@ -71,7 +71,9 @@ export class MT63decoder {
     for (let i = 0; i < this.DataCarriers; i++) {
       this.IntlvPatt[i] = p * this.ScanSize;
       p += Pattern[i];
-      if (p >= this.IntlvLen) p -= this.IntlvLen;
+      if (p >= this.IntlvLen) {
+        p -= this.IntlvLen;
+      }
     }
   }
 
@@ -89,10 +91,14 @@ export class MT63decoder {
     for (s = 0; s < this.ScanLen; s++) {
       for (i = 0; i < this.DataCarriers; i++) {
         k = this.IntlvPtr - this.ScanSize - this.IntlvPatt[i];
-        if (k < 0) k += this.IntlvSize;
+        if (k < 0) {
+          k += this.IntlvSize;
+        }
         if (s & 1 && i & 1) {
           k += this.ScanSize;
-          if (k >= this.IntlvSize) k -= this.IntlvSize;
+          if (k >= this.IntlvSize) {
+            k -= this.IntlvSize;
+          }
         }
         const index = k + s + i;
 
@@ -101,6 +107,7 @@ export class MT63decoder {
           this.WalshBuff[i] = this.IntlvPipe[index];
         } else {
           // Handle out of bounds access - this shouldn't happen in correct implementation
+          // eslint-disable-next-line no-console
           console.log(
             `INDEX OUT OF BOUNDS: ${index} >= ${this.IntlvSize}, using 0`
           );
@@ -126,8 +133,11 @@ export class MT63decoder {
         this.WalshBuff[MinPos] = 0.0;
       }
       Noise = dspRMS(this.WalshBuff, this.DataCarriers);
-      if (Noise > 0.0) SNR = Sig / Noise;
-      else SNR = 0.0;
+      if (Noise > 0.0) {
+        SNR = Sig / Noise;
+      } else {
+        SNR = 0.0;
+      }
       const snrResult = dspLowPass2(
         SNR,
         this.DecodeSnrMid[s],
@@ -141,9 +151,13 @@ export class MT63decoder {
       this.DecodePipe[this.DecodePtr + s] = code;
     }
     this.IntlvPtr += this.ScanSize;
-    if (this.IntlvPtr >= this.IntlvSize) this.IntlvPtr = 0;
+    if (this.IntlvPtr >= this.IntlvSize) {
+      this.IntlvPtr = 0;
+    }
     this.DecodePtr += this.ScanLen;
-    if (this.DecodePtr >= this.DecodeSize) this.DecodePtr = 0;
+    if (this.DecodePtr >= this.DecodeSize) {
+      this.DecodePtr = 0;
+    }
     const finalMaxResult = dspFindMax(this.DecodeSnrOut, this.ScanLen);
     Max = finalMaxResult.max;
     MaxPos = finalMaxResult.index;

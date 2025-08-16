@@ -8,7 +8,7 @@ export function downSample(
   from: number,
   to: number,
   output: Float32Array
-) {
+): number {
   const ratioWeight = from / to;
   let outputOffset = 0;
   if (bufferLength > 0) {

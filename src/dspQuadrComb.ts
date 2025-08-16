@@ -1,14 +1,14 @@
-import { dspCmpx, DspCmpxBuff, dspWinFirI, winFirQ } from './dsp';
+import { DspCmpxBuff, dspCmpx, dspWinFirI, winFirQ } from './dsp';
 
 export class DspQuadrComb {
   private Tap: number[] = [];
-  private ExternShape: boolean = true;
+  private ExternShape = true;
   private ShapeI: number[] = [];
   private ShapeQ: number[] = [];
   Output: number[] = [];
-  private Len: number = 0;
-  private TapPtr: number = 0;
-  private Rate: number = 0;
+  private Len = 0;
+  private TapPtr = 0;
+  private Rate = 0;
 
   Free(): void {
     if (!this.ExternShape) {
@@ -46,7 +46,7 @@ export class DspQuadrComb {
     LowOmega: number,
     UppOmega: number,
     Window: (value: number) => number
-  ) {
+  ): void {
     if (this.ExternShape) {
       this.ShapeI = [];
       this.ShapeQ = [];
@@ -61,12 +61,10 @@ export class DspQuadrComb {
 
   process(Input: DspCmpxBuff): number {
     let i: number, o: number, r: number, t: number, len: number;
-    let Inp: dspCmpx[];
-    let Out: number[];
-    let InpLen = Input.len;
+    const InpLen = Input.len;
     let I: number, Q: number;
-    Inp = Input.data;
-    Out = this.Output;
+    const Inp: dspCmpx[] = Input.data;
+    const Out: number[] = this.Output;
 
     for (o = 0, i = 0; i < InpLen; i++) {
       I = Inp[i].re;
