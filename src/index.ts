@@ -7,12 +7,9 @@ export function encodeString(
   text: string,
   bandwidth: number,
   longInterleave: boolean,
-  audioCtx: AudioContext,
+  audioCtx: AudioContext
 ) {
   return mt63Client.encodeString(text, bandwidth, longInterleave, audioCtx);
 }
 
-export {
-  initRx,
-  processAudioResample as processAudio,
-} from './MT63typescript';
+export { initRx, processAudioResample as processAudio } from './MT63typescript';

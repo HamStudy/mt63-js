@@ -26,7 +26,9 @@ export class MT63Client {
       // We will increase the size by 125% of the difference or 50% of the max size, whichever
       // is larger; this is so that we don't resize it too often, so the minimum size increase
       // is 5 minutes but if there is more than 5 minutes of data we'll add more than that
-      this.sourceBuffer = new Float32Array(sourceBufferSize + Math.max(sizeDiff * 1.25, this.bufferMaxSize * 0.5));
+      this.sourceBuffer = new Float32Array(
+        sourceBufferSize + Math.max(sizeDiff * 1.25, this.bufferMaxSize * 0.5)
+      );
     }
   }
   /**
@@ -38,7 +40,9 @@ export class MT63Client {
     let maxVal = 0.0;
     for (const x of this.TX.Comb.Output) {
       const a = Math.abs(x);
-      if (a > maxVal) { maxVal = a; }
+      if (a > maxVal) {
+        maxVal = a;
+      }
     }
 
     if (multiplier > this.sigLimit) {
@@ -46,7 +50,7 @@ export class MT63Client {
     }
 
     for (const x of this.TX.Comb.Output) {
-      let val = x * 1.0 / maxVal * multiplier;
+      let val = ((x * 1.0) / maxVal) * multiplier;
       if (val > this.sigLimit) {
         val = this.sigLimit;
       }
@@ -69,7 +73,7 @@ export class MT63Client {
     text: string,
     bandwidth: number,
     longInterleave: boolean,
-    audioCtx: AudioContext,
+    audioCtx: AudioContext
   ) {
     if (bandwidth !== 500 && bandwidth !== 1000 && bandwidth !== 2000) {
       throw new Error('Invalid bandwidth');
@@ -104,8 +108,15 @@ export class MT63Client {
     this.TX.SendJam();
     this.flushToBuffer();
 
-    const audioBuffer = audioCtx.createBuffer(1, this.dataSize, this.sampleRate * 3); // why multiple sample rate by 3?
-    audioBuffer.copyToChannel(new Float32Array(this.sourceBuffer.subarray(0, this.dataSize)), 0);
+    const audioBuffer = audioCtx.createBuffer(
+      1,
+      this.dataSize,
+      this.sampleRate * 3
+    ); // why multiple sample rate by 3?
+    audioBuffer.copyToChannel(
+      new Float32Array(this.sourceBuffer.subarray(0, this.dataSize)),
+      0
+    );
 
     let source = audioCtx.createBufferSource();
     source.playbackRate.value = 1 / 3; // why?
@@ -122,22 +133,29 @@ export class MT63Client {
 
   sendTone(seconds: number, bandwidth: number): void {
     const numsmpls = Math.floor((this.sampleRate * seconds) / 512);
-    const w1 = 2.0 * Math.PI * (this.centerFreq - bandwidth / 2.0) / this.sampleRate;
-    const w2 = 2.0 * Math.PI * (this.centerFreq + 31.0 * bandwidth / 64.0) / this.sampleRate;
+    const w1 =
+      (2.0 * Math.PI * (this.centerFreq - bandwidth / 2.0)) / this.sampleRate;
+    const w2 =
+      (2.0 * Math.PI * (this.centerFreq + (31.0 * bandwidth) / 64.0)) /
+      this.sampleRate;
     let phi1 = 0.0;
     let phi2 = 0.0;
     this.ensureBufferSpace(numsmpls * 512);
     for (let i = 0; i < numsmpls; i++) {
       for (let j = 0; j < 512; j++) {
-        this.sourceBuffer![this.dataSize] = this.TONE_AMP * 0.5 * Math.cos(phi1) + this.TONE_AMP * 0.5 * Math.cos(phi2);
+        this.sourceBuffer![this.dataSize] =
+          this.TONE_AMP * 0.5 * Math.cos(phi1) +
+          this.TONE_AMP * 0.5 * Math.cos(phi2);
         this.dataSize++;
         phi1 += w1;
         phi2 += w2;
         if (i === 0) {
-          this.sourceBuffer![this.dataSize - 1] *= 1.0 - Math.exp(-1.0 * j / 40.0);
+          this.sourceBuffer![this.dataSize - 1] *=
+            1.0 - Math.exp((-1.0 * j) / 40.0);
         }
         if (i === seconds - 1) {
-          this.sourceBuffer![this.dataSize - 1] *= 1.0 - Math.exp(-1.0 * (this.sampleRate - j) / 40.0);
+          this.sourceBuffer![this.dataSize - 1] *=
+            1.0 - Math.exp((-1.0 * (this.sampleRate - j)) / 40.0);
         }
       }
     }

@@ -7,13 +7,18 @@ const centerFrequency = 1500;
 let inputBuffer = new Float32Array(10);
 let inputBufferSize = 10;
 
-let lastString = "";
+let lastString = '';
 let escape = 0;
 let sqlVal = 8.0;
 
 const Rx = new MT63rx();
 
-export function initRx(bandwidth: number, interleave: boolean, integration: number, squelch: number): void {
+export function initRx(
+  bandwidth: number,
+  interleave: boolean,
+  integration: number,
+  squelch: number
+): void {
   Rx.Preset(centerFrequency, bandwidth, interleave, integration);
   sqlVal = squelch;
 }
@@ -23,12 +28,12 @@ export function processAudio(samples: Float32Array, len: number): string {
   const inBuff = samples.subarray(0, len);
   Rx.Process(inBuff);
   if (Rx.FEC_SNR() < sqlVal) {
-    return "";
+    return '';
   }
-  lastString = "";
+  lastString = '';
   for (let i = 0; i < Rx.Output.Len; ++i) {
     let c = Rx.Output.Data[i];
-    if ((c < 8) && escape === 0) {
+    if (c < 8 && escape === 0) {
       continue;
     }
     if (c === 127) {
@@ -44,12 +49,16 @@ export function processAudio(samples: Float32Array, len: number): string {
   return lastString;
 }
 
-export function processAudioResample(samples: Float32Array, sampleRate: number, len: number): string {
+export function processAudioResample(
+  samples: Float32Array,
+  sampleRate: number,
+  len: number
+): string {
   const ratioWeight = sampleRate / k_SAMPLERATE;
   if (ratioWeight === 1) {
     return processAudio(samples, len);
   } else if (ratioWeight < 1) {
-    return "ERROR BAD SAMPLE RATE";
+    return 'ERROR BAD SAMPLE RATE';
   }
   // Downsample
   const maxOutputSize = Math.floor(len / ratioWeight) + 10;
@@ -57,7 +66,13 @@ export function processAudioResample(samples: Float32Array, sampleRate: number, 
     inputBuffer = new Float32Array(maxOutputSize);
     inputBufferSize = maxOutputSize;
   }
-  const newLen = downSample(samples, len, sampleRate, k_SAMPLERATE, inputBuffer);
+  const newLen = downSample(
+    samples,
+    len,
+    sampleRate,
+    k_SAMPLERATE,
+    inputBuffer
+  );
   return processAudio(inputBuffer, newLen);
 }
 

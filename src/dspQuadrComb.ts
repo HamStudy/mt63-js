@@ -24,7 +24,7 @@ export class DspQuadrComb {
     FilterLen: number,
     FilterShape_I: number[] | null,
     FilterShape_Q: number[] | null,
-    DecimateRate: number,
+    DecimateRate: number
   ): void {
     this.Len = FilterLen;
     this.Tap.length = this.Len;
@@ -45,7 +45,7 @@ export class DspQuadrComb {
   computeShape(
     LowOmega: number,
     UppOmega: number,
-    Window: (value: number) => number,
+    Window: (value: number) => number
   ) {
     if (this.ExternShape) {
       this.ShapeI = [];

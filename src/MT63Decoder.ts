@@ -1,27 +1,35 @@
-import { dspFindMax, dspFindMin, dspLowPass2, dspLowPass2Coeff, dspPowerOf2, dspRMS, dspWalshTrans } from './dsp';
+import {
+  dspFindMax,
+  dspFindMin,
+  dspLowPass2,
+  dspLowPass2Coeff,
+  dspPowerOf2,
+  dspRMS,
+  dspWalshTrans,
+} from './dsp';
 
 export class MT63decoder {
-  public Output: number = 0;  // C++ uses char but we use number
+  public Output: number = 0; // C++ uses char but we use number
   public SignalToNoise = 0;
   public CarrOfs = 0;
 
   private DataCarriers: number;
-  private IntlvPipe: Float64Array;  // C++ uses double*
+  private IntlvPipe: Float64Array; // C++ uses double*
   private IntlvLen: number;
   private IntlvSize: number;
   private IntlvPtr: number = 0;
-  private IntlvPatt: Int32Array;  // C++ uses int*
+  private IntlvPatt: Int32Array; // C++ uses int*
 
-  private WalshBuff: Float64Array;  // C++ uses double*
+  private WalshBuff: Float64Array; // C++ uses double*
 
   private ScanLen: number;
   private ScanSize: number;
-  private DecodeSnrMid: Float64Array;  // C++ uses double*
-  private DecodeSnrOut: Float64Array;  // C++ uses double*
+  private DecodeSnrMid: Float64Array; // C++ uses double*
+  private DecodeSnrOut: Float64Array; // C++ uses double*
   private W1: number;
   private W2: number;
   private W5: number;
-  private DecodePipe: Uint8Array;  // C++ uses char*
+  private DecodePipe: Uint8Array; // C++ uses char*
   private DecodeLen: number;
   private DecodeSize: number;
   private DecodePtr: number = 0;
@@ -31,7 +39,7 @@ export class MT63decoder {
     Intlv: number,
     Pattern: number[] | Int32Array,
     Margin: number,
-    Integ: number,
+    Integ: number
   ) {
     this.DataCarriers = Carriers;
     this.IntlvLen = Intlv;
@@ -82,7 +90,7 @@ export class MT63decoder {
       for (i = 0; i < this.DataCarriers; i++) {
         k = this.IntlvPtr - this.ScanSize - this.IntlvPatt[i];
         if (k < 0) k += this.IntlvSize;
-        if ((s & 1) && (i & 1)) {
+        if (s & 1 && i & 1) {
           k += this.ScanSize;
           if (k >= this.IntlvSize) k -= this.IntlvSize;
         }
@@ -93,10 +101,11 @@ export class MT63decoder {
           this.WalshBuff[i] = this.IntlvPipe[index];
         } else {
           // Handle out of bounds access - this shouldn't happen in correct implementation
-          console.log(`INDEX OUT OF BOUNDS: ${index} >= ${this.IntlvSize}, using 0`);
+          console.log(
+            `INDEX OUT OF BOUNDS: ${index} >= ${this.IntlvSize}, using 0`
+          );
           this.WalshBuff[i] = 0.0;
         }
-
       }
 
       dspWalshTrans(this.WalshBuff, this.DataCarriers);
@@ -117,10 +126,16 @@ export class MT63decoder {
         this.WalshBuff[MinPos] = 0.0;
       }
       Noise = dspRMS(this.WalshBuff, this.DataCarriers);
-      if (Noise > 0.0)
-        SNR = Sig / Noise;
+      if (Noise > 0.0) SNR = Sig / Noise;
       else SNR = 0.0;
-      const snrResult = dspLowPass2(SNR, this.DecodeSnrMid[s], this.DecodeSnrOut[s], this.W1, this.W2, this.W5);
+      const snrResult = dspLowPass2(
+        SNR,
+        this.DecodeSnrMid[s],
+        this.DecodeSnrOut[s],
+        this.W1,
+        this.W2,
+        this.W5
+      );
       this.DecodeSnrMid[s] = snrResult.mid;
       this.DecodeSnrOut[s] = snrResult.out;
       this.DecodePipe[this.DecodePtr + s] = code;
@@ -139,4 +154,3 @@ export class MT63decoder {
     return 0;
   }
 }
-

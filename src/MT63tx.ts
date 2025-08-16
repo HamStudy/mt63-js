@@ -14,7 +14,7 @@ export class MT63tx {
   private DataCarriers: number = 0;
   private FirstDataCarr: number = 0;
   private WindowLen = SymbolLen;
-  private TxWindow = SymbolShape;  // This is a Float64Array constant
+  private TxWindow = SymbolShape; // This is a Float64Array constant
   private AliasFilterLen: number = 0;
   private DecimateRatio: number = 0;
   private InterleavePattern: readonly number[] = shortInterleavePattern;
@@ -23,8 +23,8 @@ export class MT63tx {
   // private CarrMarkAmpl: number;
   private Encoder!: MT63Encoder;
   private EncoderOld: MT63encoderOld = new MT63encoderOld();
-  private TxVect: Int32Array = new Int32Array(0);  // C++ uses int*
-  private dspPhaseCorr: Int32Array = new Int32Array(0);  // C++ uses int*
+  private TxVect: Int32Array = new Int32Array(0); // C++ uses int*
+  private dspPhaseCorr: Int32Array = new Int32Array(0); // C++ uses int*
   private WindowBuff = new DspCmpxBuff();
   private FFT: dsp_r2FFT = new dsp_r2FFT();
   private txmixer: DspCmpxMixer = new DspCmpxMixer();
@@ -46,36 +46,46 @@ export class MT63tx {
     this.WindowBuff.free();
   }
 
-  public preset(freq: number, BandWidth: number = 1000, LongInterleave: boolean = false): boolean {
+  public preset(
+    freq: number,
+    BandWidth: number = 1000,
+    LongInterleave: boolean = false
+  ): boolean {
     // values used to computer the blackman3 passband filter shape
-    const hbw = 1.5 * BandWidth / 2;
-    let omega_low = (freq - hbw);
-    let omega_high = (freq + hbw);
+    const hbw = (1.5 * BandWidth) / 2;
+    let omega_low = freq - hbw;
+    let omega_high = freq + hbw;
     if (omega_low < 100) {
       omega_low = 100;
     }
     if (omega_high > 4000) {
       omega_high = 4000;
     }
-    omega_low *= (Math.PI / 4000);
-    omega_high *= (Math.PI / 4000);
+    omega_low *= Math.PI / 4000;
+    omega_high *= Math.PI / 4000;
 
     let mask = this.FFT.Size - 1;
     this.DataCarriers = 64;
 
-    switch(BandWidth) {
+    switch (BandWidth) {
       case 500:
-        this.FirstDataCarr = Math.floor((freq - BandWidth / 2.0) * 256 / 500 + .5);
+        this.FirstDataCarr = Math.floor(
+          ((freq - BandWidth / 2.0) * 256) / 500 + 0.5
+        );
         this.AliasFilterLen = 128;
         this.DecimateRatio = 8;
         break;
       case 1000:
-        this.FirstDataCarr = Math.floor((freq - BandWidth / 2.0) * 128 / 500 + 0.5);
+        this.FirstDataCarr = Math.floor(
+          ((freq - BandWidth / 2.0) * 128) / 500 + 0.5
+        );
         this.AliasFilterLen = 64;
         this.DecimateRatio = 4;
         break;
       case 2000:
-        this.FirstDataCarr = Math.floor((freq - BandWidth / 2.0) * 64 / 500 + 0.5);
+        this.FirstDataCarr = Math.floor(
+          ((freq - BandWidth / 2.0) * 64) / 500 + 0.5
+        );
         this.AliasFilterLen = 64;
         this.DecimateRatio = 2;
         break;
@@ -102,11 +112,20 @@ export class MT63tx {
     this.WindowBuff.ensureSpace(2 * this.WindowLen);
     this.WindowBuff.len = 2 * this.WindowLen;
 
-    this.Encoder = new MT63Encoder(this.DataCarriers, this.DataInterleave, [...this.InterleavePattern], true);
+    this.Encoder = new MT63Encoder(
+      this.DataCarriers,
+      this.DataInterleave,
+      [...this.InterleavePattern],
+      true
+    );
     if (this.FFT.preset(this.WindowLen)) {
       return false;
     }
-    this.Window.preset(this.WindowLen, SymbolSepar / 2, Array.from(this.TxWindow));
+    this.Window.preset(
+      this.WindowLen,
+      SymbolSepar / 2,
+      Array.from(this.TxWindow)
+    );
 
     // Preset the combining instance, NULL pointers in lieu of fixed filter shapes
     // blackman3 filter provides flat passband and sufficient out-of-band rejection
@@ -130,7 +149,11 @@ export class MT63tx {
     // Like above we compute indexes to the FFT.Twiddle[]
 
     let incr = (SymbolSepar * DataCarrSepar) & mask;
-    for (let p = (SymbolSepar * this.FirstDataCarr) & mask, i = 0; i < this.DataCarriers; i++) {
+    for (
+      let p = (SymbolSepar * this.FirstDataCarr) & mask, i = 0;
+      i < this.DataCarriers;
+      i++
+    ) {
       this.dspPhaseCorr[i] = p;
       p = (p + incr) & mask;
     }
@@ -162,7 +185,7 @@ export class MT63tx {
     let c = this.FirstDataCarr;
     let r = this.FFT.BitRevIdx[c & mask];
     this.WindowBuff.data[r].re = Ampl * this.FFT.Twiddle[this.TxVect[i]].re;
-    this.WindowBuff.data[r].im = (-Ampl) * this.FFT.Twiddle[this.TxVect[i]].im;
+    this.WindowBuff.data[r].im = -Ampl * this.FFT.Twiddle[this.TxVect[i]].im;
 
     // W1HKJ
     // 2nd tone at the highest most MT63 carrier + 1
@@ -172,10 +195,10 @@ export class MT63tx {
 
     if (twotones) {
       i = this.DataCarriers - 1;
-      c = (this.FirstDataCarr + i * DataCarrSepar);
+      c = this.FirstDataCarr + i * DataCarrSepar;
       r = this.WindowLen + this.FFT.BitRevIdx[c & mask];
       this.WindowBuff.data[r].re = Ampl * this.FFT.Twiddle[this.TxVect[i]].re;
-      this.WindowBuff.data[r].im = (-Ampl) * this.FFT.Twiddle[this.TxVect[i]].im;
+      this.WindowBuff.data[r].im = -Ampl * this.FFT.Twiddle[this.TxVect[i]].im;
     }
 
     // inverse FFT: WindowBuff is already scrambled
@@ -184,7 +207,7 @@ export class MT63tx {
 
     // negate the imaginary part for the IFFT
     for (let i = 0; i < 2 * this.WindowLen; i++) {
-      this.WindowBuff.data[i].im *= (-1.0);
+      this.WindowBuff.data[i].im *= -1.0;
     }
 
     // process the FFT values to produce a complex time domain vector
@@ -202,8 +225,6 @@ export class MT63tx {
 
     // print the character and the DataBlock being sent
     // console.log(`0x${char.charCodeAt(0).toString(16).padStart(2, '0')} [${char >= ' ' ? char : '.'}] => ${encodedOutput.join('')}`);
-
-
 
     // here we encode the encodedOutput into dspPhase flips
 
@@ -232,7 +253,8 @@ export class MT63tx {
 
     for (let i = 0; i < this.DataCarriers; i++) {
       j = i & mask;
-      if (!Math.floor(Math.random() * 256)) { // 255/256 chance of being false
+      if (!Math.floor(Math.random() * 256)) {
+        // 255/256 chance of being false
         // turn left 90 degrees
         this.TxVect[j] = (this.TxVect[j] + this.dspPhaseCorr[j] + left) & mask;
       } else {
@@ -256,10 +278,16 @@ export class MT63tx {
       this.WindowBuff.data[i] = { re: 0.0, im: 0.0 };
     }
 
-    for (let i = 0, c = this.FirstDataCarr; i < this.DataCarriers; i++, c += DataCarrSepar) {
-      let r = (this.FFT.BitRevIdx[c & mask]) + this.WindowLen * (i & 1);
-      this.WindowBuff.data[r].re = this.TxAmpl * this.FFT.Twiddle[this.TxVect[i]].re;
-      this.WindowBuff.data[r].im = (-this.TxAmpl) * this.FFT.Twiddle[this.TxVect[i]].im;
+    for (
+      let i = 0, c = this.FirstDataCarr;
+      i < this.DataCarriers;
+      i++, c += DataCarrSepar
+    ) {
+      let r = this.FFT.BitRevIdx[c & mask] + this.WindowLen * (i & 1);
+      this.WindowBuff.data[r].re =
+        this.TxAmpl * this.FFT.Twiddle[this.TxVect[i]].re;
+      this.WindowBuff.data[r].im =
+        -this.TxAmpl * this.FFT.Twiddle[this.TxVect[i]].im;
     }
 
     this.FFT.coreProc(this.WindowBuff.data.slice());
@@ -267,7 +295,7 @@ export class MT63tx {
 
     // negate the imaginary part for the IFFT
     for (let i = 0; i < 2 * this.WindowLen; i++) {
-      this.WindowBuff.data[i].im *= (-1.0);
+      this.WindowBuff.data[i].im *= -1.0;
     }
 
     this.Window.process(this.WindowBuff);
@@ -275,5 +303,4 @@ export class MT63tx {
     // audio output to be sent out is in Comb.Output
     this.Comb.process(this.Window.Output);
   }
-
 }

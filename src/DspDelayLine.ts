@@ -9,10 +9,7 @@ export class DspDelayLine<T> {
   public inpOffset: number = 0; // offset into line for the most recent input
   public inpLen: number; // number of samples for the most recent input
 
-  constructor(
-    maxDspDelay: number,
-    maxSize: number = 0,
-  ) {
+  constructor(maxDspDelay: number, maxSize: number = 0) {
     this.lineSize = maxSize;
     if (this.lineSize < 2 * maxDspDelay) {
       this.lineSize = 2 * maxDspDelay;
@@ -28,7 +25,11 @@ export class DspDelayLine<T> {
 
   public process(inp: T[], len: number): number {
     if (this.dataLen + len > this.lineSize) {
-      this.moveArray(this.line, this.line.slice(this.dataLen - this.dspDelay), this.dspDelay);
+      this.moveArray(
+        this.line,
+        this.line.slice(this.dataLen - this.dspDelay),
+        this.dspDelay
+      );
       this.dataLen = this.dspDelay;
     }
     if (this.dataLen + len > this.lineSize) {

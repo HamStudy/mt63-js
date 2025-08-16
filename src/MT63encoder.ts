@@ -17,7 +17,12 @@ export class MT63encoderOld {
     this.WalshBuff = [];
     this.IntlvPatt = [];
   }
-  public preset(Carriers: number, Intlv: number, Pattern: number[], PreFill: boolean = false): boolean {
+  public preset(
+    Carriers: number,
+    Intlv: number,
+    Pattern: number[],
+    PreFill: boolean = false
+  ): boolean {
     if (Carriers < 2 || Carriers % 2) {
       return false;
     }
@@ -80,7 +85,7 @@ export class MT63encoderOld {
       }
     } else {
       for (let i = 0; i < this.DataCarriers; i++) {
-        this.Output[i] = (this.WalshBuff[i] < 0.0);
+        this.Output[i] = this.WalshBuff[i] < 0.0;
       }
     }
 
@@ -88,34 +93,8 @@ export class MT63encoderOld {
   }
 }
 
-const shortInterleavePattern = Object.freeze([
-  4,5,6,7,
-  4,5,6,7,
-  4,5,6,7,
-  4,5,6,7,
-  4,5,6,7,
-  4,5,6,7,
-  4,5,6,7,
-  4,5,6,7,
-  4,5,6,7,
-  4,5,6,7,
-  4,5,6,7,
-  4,5,6,7,
-  4,5,6,7,
-  4,5,6,7,
-  4,5,6,7,
-  4,5,6,7,
-]);
-
-const longInterleavePattern = Object.freeze([
-  1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,
-  17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,
-  33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,
-  49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,0,
-]);
-
-
-export class MT63Encoder { // tslint:disable-line
+export class MT63Encoder {
+  // tslint:disable-line
   interleaveSize: number;
   interleavePipe: number[] = [];
 
@@ -139,11 +118,11 @@ export class MT63Encoder { // tslint:disable-line
      */
     private interleaveLength: number,
     interleavePattern: number[],
-    preFill = false,
+    preFill = false
   ) {
     // if (!dspPowerOf2(this.dataCarriers)) {
     if (this.dataCarriers < 2 || this.dataCarriers % 2) {
-      throw new Error("DataCarriers must be even and greater than 2");
+      throw new Error('DataCarriers must be even and greater than 2');
     }
 
     this.interleaveSize = this.interleaveLength * dataCarriers;
@@ -185,7 +164,8 @@ export class MT63Encoder { // tslint:disable-line
 
     if (this.interleaveLength) {
       for (let i = 0; i < this.dataCarriers; i++) {
-        this.interleavePipe[this.interleavePointer + i] = walshBuff[i] < 0.0 ? 1 : 0;
+        this.interleavePipe[this.interleavePointer + i] =
+          walshBuff[i] < 0.0 ? 1 : 0;
       }
 
       for (let i = 0; i < this.dataCarriers; i++) {
@@ -201,10 +181,9 @@ export class MT63Encoder { // tslint:disable-line
       }
     } else {
       for (let i = 0; i < this.dataCarriers; i++) {
-        output[i] = (walshBuff[i] < 0.0 ? 1 : 0);
+        output[i] = walshBuff[i] < 0.0 ? 1 : 0;
       }
     }
     return output;
   }
-
 }
