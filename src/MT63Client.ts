@@ -113,15 +113,14 @@ export class MT63Client {
     const audioBuffer = audioCtx.createBuffer(
       1,
       this.dataSize,
-      this.sampleRate * 3
-    ); // why multiple sample rate by 3?
+      this.sampleRate
+    );
     audioBuffer.copyToChannel(
       new Float32Array(this.sourceBuffer.subarray(0, this.dataSize)),
       0
     );
 
     const source = audioCtx.createBufferSource();
-    source.playbackRate.value = 1 / 3; // why?
     source.buffer = audioBuffer;
     source.connect(audioCtx.destination);
 
