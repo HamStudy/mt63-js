@@ -1,57 +1,69 @@
-let tailExists = false;
-let lastOutput = 0;
-let lastWeight = 0;
+export class Downsampler {
+  readonly ratioWeight: number;
 
-export function downSample(
-  input: Float32Array,
-  bufferLength: number,
-  from: number,
-  to: number,
-  output: Float32Array
-): number {
-  const ratioWeight = from / to;
-  let outputOffset = 0;
-  if (bufferLength > 0) {
-    const buffer = input;
+  private tailExists = false;
+  private lastOutput = 0;
+  private lastWeight = 0;
+
+  constructor(from: number, to: number) {
+    this.ratioWeight = from / to;
+  }
+
+  calculateMaxOutputSize(inputLength: number): number {
+    return Math.ceil(inputLength / this.ratioWeight);
+  }
+
+  downSample(input: Float32Array, output: Float32Array): Float32Array {
+    if (output.length === 0) {
+      return output.subarray(0, 0);
+    }
+
     let weight = 0;
     let output0 = 0;
     let actualPosition = 0;
     let amountToNext = 0;
-    let alreadyProcessedTail = !tailExists;
-    tailExists = false;
+    let alreadyProcessedTail = !this.tailExists;
+    this.tailExists = false;
     const outputBuffer = output;
     let currentPosition = 0;
-    do {
+    let outputOffset = 0;
+    while (actualPosition < input.length) {
       if (alreadyProcessedTail) {
-        weight = ratioWeight;
+        weight = this.ratioWeight;
         output0 = 0;
       } else {
-        weight = lastWeight;
-        output0 = lastOutput;
+        weight = this.lastWeight;
+        output0 = this.lastOutput;
         alreadyProcessedTail = true;
       }
-      while (weight > 0 && actualPosition < bufferLength) {
+      while (weight > 0 && actualPosition < input.length) {
         amountToNext = 1 + actualPosition - currentPosition;
         if (weight >= amountToNext) {
-          output0 += buffer[actualPosition++] * amountToNext;
+          output0 += input[actualPosition++] * amountToNext;
           currentPosition = actualPosition;
           weight -= amountToNext;
         } else {
-          output0 += buffer[actualPosition] * weight;
+          output0 += input[actualPosition] * weight;
           currentPosition += weight;
           weight = 0;
           break;
         }
       }
       if (weight <= 0) {
-        outputBuffer[outputOffset++] = output0 / ratioWeight;
+        outputBuffer[outputOffset++] = output0 / this.ratioWeight;
       } else {
-        lastWeight = weight;
-        lastOutput = output0;
-        tailExists = true;
+        this.lastWeight = weight;
+        this.lastOutput = output0;
+        this.tailExists = true;
         break;
       }
-    } while (actualPosition < bufferLength);
+    }
+    return output.subarray(0, outputOffset);
   }
-  return outputOffset;
+
+  reset(): void {
+    this.tailExists = false;
+    this.lastOutput = 0;
+    this.lastWeight = 0;
+  }
 }

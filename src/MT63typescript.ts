@@ -1,11 +1,12 @@
-import { downSample } from './downsample';
+import { Downsampler } from './downsample';
 import { MT63rx } from './MT63rx';
 
 const k_SAMPLERATE = 8000;
 const centerFrequency = 1500;
 
-let inputBuffer = new Float32Array(10);
+let resampledBuffer = new Float32Array(10);
 let inputBufferSize = 10;
+let downsampler: Downsampler | null = null;
 
 let lastString = '';
 let escape = 0;
@@ -60,20 +61,17 @@ export function processAudioResample(
   } else if (ratioWeight < 1) {
     return 'ERROR BAD SAMPLE RATE';
   }
+  if (!downsampler || downsampler.ratioWeight !== ratioWeight) {
+    downsampler = new Downsampler(sampleRate, k_SAMPLERATE);
+  }
   // Downsample
-  const maxOutputSize = Math.floor(len / ratioWeight) + 10;
+  const maxOutputSize = downsampler.calculateMaxOutputSize(len);
   if (inputBufferSize < maxOutputSize) {
-    inputBuffer = new Float32Array(maxOutputSize);
+    resampledBuffer = new Float32Array(maxOutputSize);
     inputBufferSize = maxOutputSize;
   }
-  const newLen = downSample(
-    samples,
-    len,
-    sampleRate,
-    k_SAMPLERATE,
-    inputBuffer
-  );
-  return processAudio(inputBuffer, newLen);
+  const inputBuffer = downsampler.downSample(samples, resampledBuffer);
+  return processAudio(inputBuffer, inputBuffer.length);
 }
 
 export function getSampleRate(): number {
