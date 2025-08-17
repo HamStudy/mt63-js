@@ -6,6 +6,7 @@ import { dspCmpxOverlapWindow } from './dspCmpxOverlapWindow';
 import { dsp_r2FFT } from './FFT';
 import { DspQuadrComb } from './dspQuadrComb';
 import { DspCmpxMixer } from './dspCmpxMixer';
+import { CENTER_FREQUENCY } from './constants';
 
 export class MT63tx {
   public DataInterleave: 64 | 32 = 32;
@@ -31,9 +32,8 @@ export class MT63tx {
   private Window = new dspCmpxOverlapWindow();
 
   constructor(bandwidth = 1000, interleave: 0 | 1 = 0) {
-    const freq = 1500; // Default center frequency
     const longInterleave = interleave === 1;
-    this.preset(freq, bandwidth, longInterleave);
+    this.preset(CENTER_FREQUENCY, bandwidth, longInterleave);
   }
 
   public Free(): void {

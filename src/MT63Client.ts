@@ -1,16 +1,15 @@
 import { MT63tx } from './MT63tx';
+import { CENTER_FREQUENCY, SAMPLE_RATE } from './constants';
 
 export class MT63Client {
   TX = new MT63tx();
-  sampleRate = 8000;
-  centerFreq = 1500;
   txLevel = -6.0;
   sigLimit = 0.95;
   TONE_AMP = 0.8;
   bufferSeconds = 600;
 
   get bufferMaxSize(): number {
-    return this.sampleRate * this.bufferSeconds; // 8000Hz sample rate, 600 seconds (10 minutes)
+    return SAMPLE_RATE * this.bufferSeconds; // 8000Hz sample rate, 600 seconds (10 minutes)
   }
 
   sourceBuffer?: Float32Array;
@@ -83,7 +82,7 @@ export class MT63Client {
     this.sourceBuffer = new Float32Array();
     this.dataSize = 0;
 
-    this.TX.preset(1500, bandwidth, longInterleave);
+    this.TX.preset(CENTER_FREQUENCY, bandwidth, longInterleave);
     this.sendTone(2, bandwidth);
 
     for (const curChar of text) {
@@ -108,7 +107,7 @@ export class MT63Client {
 
     return {
       samples: new Float32Array(this.sourceBuffer.subarray(0, this.dataSize)),
-      sampleRate: this.sampleRate,
+      sampleRate: SAMPLE_RATE,
     };
   }
 
@@ -145,12 +144,12 @@ export class MT63Client {
   }
 
   sendTone(seconds: number, bandwidth: number): void {
-    const numsmpls = Math.floor((this.sampleRate * seconds) / 512);
+    const numsmpls = Math.floor((SAMPLE_RATE * seconds) / 512);
     const w1 =
-      (2.0 * Math.PI * (this.centerFreq - bandwidth / 2.0)) / this.sampleRate;
+      (2.0 * Math.PI * (CENTER_FREQUENCY - bandwidth / 2.0)) / SAMPLE_RATE;
     const w2 =
-      (2.0 * Math.PI * (this.centerFreq + (31.0 * bandwidth) / 64.0)) /
-      this.sampleRate;
+      (2.0 * Math.PI * (CENTER_FREQUENCY + (31.0 * bandwidth) / 64.0)) /
+      SAMPLE_RATE;
     let phi1 = 0.0;
     let phi2 = 0.0;
     this.ensureBufferSpace(numsmpls * 512);
@@ -168,7 +167,7 @@ export class MT63Client {
         }
         if (i === seconds - 1) {
           this.sourceBuffer![this.dataSize - 1] *= // eslint-disable-line @typescript-eslint/no-non-null-assertion
-            1.0 - Math.exp((-1.0 * (this.sampleRate - j)) / 40.0);
+            1.0 - Math.exp((-1.0 * (SAMPLE_RATE - j)) / 40.0);
         }
       }
     }
