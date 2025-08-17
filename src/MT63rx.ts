@@ -20,7 +20,7 @@ import { DspDelayLine } from './DspDelayLine';
 import { longInterleavePattern, shortInterleavePattern } from './mt63intl';
 import { MT63decoder } from './MT63Decoder';
 import { Downsampler } from './downsample';
-import { CENTER_FREQUENCY, SAMPLE_RATE } from './constants';
+import { MT63Bandwidth, MT63_MODES, SAMPLE_RATE } from './constants';
 
 const SYMBOL_DIV = 4;
 const DataCarriers = 64;
@@ -134,19 +134,18 @@ export class MT63rx {
   SpectraDisplay: ((spectra: Float64Array, len: number) => void) | undefined;
 
   constructor(
-    bandwidth: 2000 | 1000 | 500,
+    bandwidth: MT63Bandwidth,
     interleave: boolean,
     integration: number,
     squelch: number
   ) {
-    this.Preset(CENTER_FREQUENCY, bandwidth, interleave, integration);
+    const centerFrequency = MT63_MODES[bandwidth].centerFrequency;
+    this.Preset(centerFrequency, bandwidth, interleave, integration);
     this.squelch = squelch;
   }
 
   Preset(
     centerFrequency: number,
-    // int MT63rx::Preset(float freq, int BandWidth, int LongInterleave, int Integ,
-    //     void (*Display)(double *Spectra, int Len))
     BandWidth: number,
     LongInterleave: boolean,
     IntegLen: number,

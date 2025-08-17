@@ -1,11 +1,12 @@
 // MT63 TypeScript Library - Main Entry Point
 import { MT63Client } from './MT63Client';
+import type { MT63Bandwidth } from './constants';
 
 const mt63Client = new MT63Client();
 
 export function encodeString(
   text: string,
-  bandwidth: number,
+  bandwidth: MT63Bandwidth,
   longInterleave: boolean,
   audioCtx: AudioContext
 ): {
@@ -18,3 +19,4 @@ export function encodeString(
 }
 
 export { MT63rx } from './MT63rx';
+export { MT63_MODES, type MT63Bandwidth } from './constants';

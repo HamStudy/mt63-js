@@ -1,8 +1,8 @@
 import { MT63tx } from './MT63tx';
-import { CENTER_FREQUENCY, SAMPLE_RATE } from './constants';
+import { MT63Bandwidth, MT63_MODES, SAMPLE_RATE } from './constants';
 
 export class MT63Client {
-  TX = new MT63tx();
+  TX = new MT63tx(2000, true);
   txLevel = -6.0;
   sigLimit = 0.95;
   TONE_AMP = 0.8;
@@ -12,7 +12,7 @@ export class MT63Client {
     return SAMPLE_RATE * this.bufferSeconds; // 8000Hz sample rate, 600 seconds (10 minutes)
   }
 
-  sourceBuffer?: Float32Array;
+  sourceBuffer?: Float32Array<ArrayBuffer>;
   dataSize = 0;
 
   ensureBufferSpace(increase: number): void {
@@ -70,19 +70,20 @@ export class MT63Client {
 
   encodeToSamples(
     text: string,
-    bandwidth: number,
+    bandwidth: MT63Bandwidth,
     longInterleave: boolean
   ): {
-    samples: Float32Array;
+    samples: Float32Array<ArrayBuffer>;
     sampleRate: number;
   } {
     if (bandwidth !== 500 && bandwidth !== 1000 && bandwidth !== 2000) {
       throw new Error('Invalid bandwidth');
     }
+    const centerFrequency = MT63_MODES[bandwidth].centerFrequency;
     this.sourceBuffer = new Float32Array();
     this.dataSize = 0;
 
-    this.TX.preset(CENTER_FREQUENCY, bandwidth, longInterleave);
+    this.TX.preset(centerFrequency, bandwidth, longInterleave);
     this.sendTone(2, bandwidth);
 
     for (const curChar of text) {
@@ -106,14 +107,14 @@ export class MT63Client {
     this.flushToBuffer();
 
     return {
-      samples: new Float32Array(this.sourceBuffer.subarray(0, this.dataSize)),
+      samples: this.sourceBuffer.subarray(0, this.dataSize),
       sampleRate: SAMPLE_RATE,
     };
   }
 
   encodeString(
     text: string,
-    bandwidth: number,
+    bandwidth: MT63Bandwidth,
     longInterleave: boolean,
     audioCtx: AudioContext
   ): {
@@ -143,12 +144,13 @@ export class MT63Client {
     };
   }
 
-  sendTone(seconds: number, bandwidth: number): void {
+  sendTone(seconds: number, bandwidth: MT63Bandwidth): void {
+    const centerFrequency = MT63_MODES[bandwidth].centerFrequency;
     const numsmpls = Math.floor((SAMPLE_RATE * seconds) / 512);
     const w1 =
-      (2.0 * Math.PI * (CENTER_FREQUENCY - bandwidth / 2.0)) / SAMPLE_RATE;
+      (2.0 * Math.PI * (centerFrequency - bandwidth / 2.0)) / SAMPLE_RATE;
     const w2 =
-      (2.0 * Math.PI * (CENTER_FREQUENCY + (31.0 * bandwidth) / 64.0)) /
+      (2.0 * Math.PI * (centerFrequency + (31.0 * bandwidth) / 64.0)) /
       SAMPLE_RATE;
     let phi1 = 0.0;
     let phi2 = 0.0;
