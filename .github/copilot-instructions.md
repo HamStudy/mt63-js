@@ -111,12 +111,19 @@ expect(Math.abs(fft_result[1].re)).toBeCloseTo(4.0, 5); // Energy at bin 1
 
 - Use Conventional Commits format
 - Keep messages to one line when possible
-- Focus on **why** not **what** (diff shows what changed)
+- Focus on **what** for the purpose of **why** not restating what the diff shows.
 - Examples:
-  - `feat: add FFT mathematical verification tests`
-  - `perf: optimize typed array usage in audio processing`
-  - `fix: correct bit-reversal scrambling in FFT implementation`
-  - BAD: `fix: changed < to <=`
+  - GOOD:
+    - `feat: add FFT mathematical verification tests`
+    - `perf: optimize typed array usage in audio processing`
+    - `fix: correct bit-reversal scrambling in FFT implementation`
+    - `refactor: extract constants for center frequency and sample rate`
+  - BAD:
+    - `fix: changed < to <=`
+    - refactor: extract constants for center frequency and sample rate
+      - Add constants.ts with CENTER_FREQUENCY (1500) and SAMPLE_RATE (8000)
+      - Replace hardcoded values in MT63Client and MT63tx with imports
+      - Remove duplicate class properties in favor of shared constants
 
 ### Branch Strategy
 
