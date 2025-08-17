@@ -30,7 +30,7 @@ export class MT63tx {
   private TxWindow = SymbolShape; // This is a Float64Array constant
   private AliasFilterLen = 0;
   private DecimateRatio = 0;
-  private InterleavePattern: readonly number[] = shortInterleavePattern;
+  private InterleavePattern = shortInterleavePattern;
   private TxAmpl = 0;
   // private CarrMarkCode: number;
   // private CarrMarkAmpl: number;
@@ -72,9 +72,16 @@ export class MT63tx {
       // We will increase the size by 125% of the difference or 50% of the max size, whichever
       // is larger; this is so that we don't resize it too often, so the minimum size increase
       // is 5 minutes but if there is more than 5 minutes of data we'll add more than that
-      this.sourceBuffer = new Float32Array(
-        sourceBufferSize + Math.max(sizeDiff * 1.25, this.bufferMaxSize * 0.5)
-      );
+      const newSize =
+        sourceBufferSize + Math.max(sizeDiff * 1.25, this.bufferMaxSize * 0.5);
+      const newBuffer = new Float32Array(newSize);
+
+      // Copy existing data if we have any
+      if (this.sourceBuffer && this.dataSize > 0) {
+        newBuffer.set(this.sourceBuffer.subarray(0, this.dataSize));
+      }
+
+      this.sourceBuffer = newBuffer;
     }
   }
 
@@ -185,7 +192,7 @@ export class MT63tx {
     this.Encoder = new MT63Encoder(
       this.DataCarriers,
       this.DataInterleave,
-      [...this.InterleavePattern],
+      this.InterleavePattern,
       true
     );
     if (this.FFT.preset(this.WindowLen)) {
@@ -376,8 +383,13 @@ export class MT63tx {
     samples: Float32Array<ArrayBuffer>;
     sampleRate: number;
   } {
-    this.sourceBuffer = new Float32Array();
+    // Reset data size but reuse existing buffer if available
     this.dataSize = 0;
+
+    // Initialize buffer if not already created
+    if (!this.sourceBuffer) {
+      this.sourceBuffer = new Float32Array(this.bufferMaxSize * 0.1); // Start with 1 minute capacity
+    }
 
     this.sendTone(2);
 

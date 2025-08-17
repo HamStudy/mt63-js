@@ -37,7 +37,7 @@ export class MT63decoder {
   constructor(
     Carriers: number,
     Intlv: number,
-    Pattern: number[] | Int32Array,
+    Pattern: Int32Array,
     Margin: number,
     Integ: number
   ) {

@@ -1,10 +1,14 @@
 import { dspWalshInvTrans } from './dsp';
 export class MT63Encoder {
   interleaveSize: number;
-  interleavePipe: number[] = [];
+  interleavePipe: Int32Array = new Int32Array(0);
 
-  interleavePattern: number[] = [];
+  interleavePattern: Int32Array;
   interleavePointer = 0;
+
+  // Pre-allocated working buffers for performance
+  private outputBuffer: Int32Array;
+  private walshBuffer: Float64Array;
 
   constructor(
     private dataCarriers: number,
@@ -22,7 +26,7 @@ export class MT63Encoder {
      * protection and latency requirements for a specific application or system.
      */
     private interleaveLength: number,
-    interleavePattern: number[],
+    interleavePattern: Int32Array,
     preFill = false
   ) {
     // if (!dspPowerOf2(this.dataCarriers)) {
@@ -32,8 +36,13 @@ export class MT63Encoder {
 
     this.interleaveSize = this.interleaveLength * dataCarriers;
 
+    // Initialize working buffers
+    this.outputBuffer = new Int32Array(this.dataCarriers);
+    this.walshBuffer = new Float64Array(this.dataCarriers);
+    this.interleavePattern = new Int32Array(this.dataCarriers);
+
     if (this.interleaveLength) {
-      this.interleavePipe.length = this.interleaveSize;
+      this.interleavePipe = new Int32Array(this.interleaveSize);
       if (preFill) {
         for (let i = 0; i < this.interleaveSize; i++) {
           this.interleavePipe[i] = Math.round(Math.random());
@@ -52,25 +61,26 @@ export class MT63Encoder {
     }
   }
 
-  process(char: string): number[] {
+  process(char: string): Int32Array {
     let code = char.charCodeAt(0);
-    const output: number[] = new Array(this.dataCarriers);
-    const walshBuff: number[] = new Array(this.dataCarriers).fill(0);
+
+    // Reuse pre-allocated buffers instead of creating new arrays
+    this.walshBuffer.fill(0);
 
     code = code % (2 * this.dataCarriers); // only character codes less than (2 * dataCarriers) are valid
 
     if (code < this.dataCarriers) {
-      walshBuff[code] = 1.0;
+      this.walshBuffer[code] = 1.0;
     } else {
-      walshBuff[code - this.dataCarriers] = -1.0;
+      this.walshBuffer[code - this.dataCarriers] = -1.0;
     }
 
-    dspWalshInvTrans(walshBuff, this.dataCarriers);
+    dspWalshInvTrans(this.walshBuffer, this.dataCarriers);
 
     if (this.interleaveLength) {
       for (let i = 0; i < this.dataCarriers; i++) {
         this.interleavePipe[this.interleavePointer + i] =
-          walshBuff[i] < 0.0 ? 1 : 0;
+          this.walshBuffer[i] < 0.0 ? 1 : 0;
       }
 
       for (let i = 0; i < this.dataCarriers; i++) {
@@ -78,7 +88,7 @@ export class MT63Encoder {
         if (k >= this.interleaveSize) {
           k -= this.interleaveSize;
         }
-        output[i] = this.interleavePipe[k + i];
+        this.outputBuffer[i] = this.interleavePipe[k + i];
       }
       this.interleavePointer += this.dataCarriers;
       if (this.interleavePointer >= this.interleaveSize) {
@@ -86,9 +96,10 @@ export class MT63Encoder {
       }
     } else {
       for (let i = 0; i < this.dataCarriers; i++) {
-        output[i] = walshBuff[i] < 0.0 ? 1 : 0;
+        this.outputBuffer[i] = this.walshBuffer[i] < 0.0 ? 1 : 0;
       }
     }
-    return output;
+
+    return this.outputBuffer;
   }
 }

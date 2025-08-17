@@ -50,7 +50,7 @@ export class MT63rx {
   SyncPipe: dspCmpx[][] = [];
 
   DataInterleave!: number;
-  InterleavePattern!: number[];
+  InterleavePattern!: Int32Array<ArrayBuffer>;
   ScanFirst!: number;
   ScanLen!: number;
   SyncPhCorr!: dspCmpx[];
@@ -202,10 +202,10 @@ export class MT63rx {
 
     if (LongInterleave) {
       this.DataInterleave = 64;
-      this.InterleavePattern = [...longInterleavePattern];
+      this.InterleavePattern = longInterleavePattern;
     } else {
       this.DataInterleave = 32;
-      this.InterleavePattern = [...shortInterleavePattern];
+      this.InterleavePattern = shortInterleavePattern;
     }
 
     const dataScanMargin = 8;

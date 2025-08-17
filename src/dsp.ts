@@ -118,7 +118,7 @@ export function dspWalshTrans(
     }
   }
 }
-export function dspWalshInvTrans(data: number[], len: number): void {
+export function dspWalshInvTrans(data: Float64Array, len: number): void {
   for (let step = len / 2; step >= 1; step /= 2) {
     for (let ptr = 0; ptr < len; ptr += 2 * step) {
       for (let ptr2 = ptr; ptr2 - ptr < step; ptr2 += 1) {
