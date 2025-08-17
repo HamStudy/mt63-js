@@ -19,24 +19,29 @@ npm install @hamstudy/mt63
 ## Usage
 
 ```typescript
-import { encodeString, initRx, processAudio } from '@hamstudy/mt63';
+import { MT63tx, MT63rx } from '@hamstudy/mt63';
 
-// Encode text to MT63 audio
-const audioBuffer = encodeString(
-  'Hello World',
-  bandwidth,
-  longInterleave,
-  audioContext
-);
+// Encode text to MT63 audio samples
+const encoder = new MT63tx(1000, false); // 1000Hz bandwidth, short interleave
+const { samples, sampleRate } = encoder.encodeString('Hello World');
+
+const audioBuffer = audioCtx.createBuffer(1, samples.length, sampleRate);
+audioBuffer.copyToChannel(samples, 0);
+
+const audioSource = audioCtx.createBufferSource();
+audioSource.buffer = audioBuffer;
+audioSource.connect(audioCtx.destination);
+audioSource.start();
 
 // Decode MT63 audio to text
-initRx(bandwidth, interleave, integration, squelch);
-const decodedText = processAudio(audioSamples, sampleRate, length);
+const decoder = new MT63rx(1000, false, 4, 8.0); // bandwidth, interleave, integration, squelch
+const decodedText = decoder.processAudio(audioSamples);
 ```
 
 ## Support Our Work
 
 To support our efforts, check out:
+
 - [SignalStuff.com](https://signalstuff.com/antennas) - Our main source of funding
 - [HamStudy.org App Store](https://hamstudy.org/appstore) - Well engineered study apps
 
@@ -51,8 +56,8 @@ the Free Software Foundation, either version 3 of the License, or
 
 @hamstudy/mt63 is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this project.  If not, see <http://www.gnu.org/licenses/>.
+along with this project. If not, see <http://www.gnu.org/licenses/>.

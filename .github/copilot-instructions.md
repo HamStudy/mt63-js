@@ -57,11 +57,12 @@ This is a TypeScript library for MT63 digital signal processing, converting an e
 ### Current Architecture
 
 - Flat file structure in `/src/` (temporary during migration)
-- Two main entry points:
-  - `MT63Client.ts` - Class-based transmit (encode text to audio)
-  - `MT63typescript.ts` - Function-based receive (decode audio to text)
-  - The plan is to unify these into MT63Client.ts as a class-based API for both encoding and decoding.
-- Mixed architecture: classes vs functions (needs unification)
+- Unified class-based architecture:
+  - `MT63tx.ts` - Class-based transmit (encode text to audio samples)
+  - `MT63rx.ts` - Class-based receive (decode audio to text)
+  - `index.ts` - Public API with createAudioSource Web Audio helper
+- MT63 mode-specific constants with proper center frequencies
+- Consolidated encoding functionality into MT63tx class
 
 ### Performance Considerations
 
@@ -137,20 +138,19 @@ expect(Math.abs(fft_result[1].re)).toBeCloseTo(4.0, 5); // Energy at bin 1
 
 - Project setup, TypeScript, ESLint, testing framework
 
-### Phase 2: Testing (Current)
+### Phase 2: Testing (Partially Complete)
 
-- Comprehensive test coverage before any refactoring
-- Mathematical verification of DSP functions
-- Integration tests with real audio data
+- Basic test infrastructure setup
+- Some unit tests for core MT63 functionality
+- Need comprehensive test coverage before further refactoring
 
-### Phase 3: Architecture (Future)
+### Phase 3: Architecture ✅ (Mostly Complete)
 
-- Unify class/function architecture
-- Directory restructuring
-- Typed array migration and optimization
-- Error handling improvements
+- Unified class-based architecture
+- MT63 mode-specific constants
+- Performance optimization with typed arrays - **CURRENT FOCUS**
 
-### Phase 4: Library Interface
+### Phase 4: Library Interface ✅
 
 - Clean public API design
 - JSDoc documentation
@@ -193,8 +193,9 @@ if (audioData.length === 0) {
 ### Legacy Files (Keep Structure)
 
 - All files in `/src/` - maintain existing names during testing phase
-- `MT63typescript.ts` - main decode functionality
-- `MT63Client.ts` - encode functionality
+- `MT63typescript.ts` - legacy decode functionality (may be consolidated)
+- `MT63tx.ts` - main encode functionality
+- `MT63rx.ts` - main decode functionality
 - DSP utility files: `FFT.ts`, `dsp.ts`, `Symbol.ts`
 
 ### Generated/Config Files

@@ -8,9 +8,11 @@ Converting MT63 TypeScript implementation into a publishable npm library as `@ha
 
 - Raw TypeScript source files in `/src/` directory
 - Two main entry points:
-  - `MT63Client.ts` - Class-based transmit (encode text to audio)
+  - `MT63tx.ts` - Class-based transmit (encode text to audio)
   - `MT63typescript.ts` - Function-based receive (decode audio to text)
-- No build system, package.json, or project infrastructure
+- Unified class-based architecture implemented
+- MT63 mode-specific constants implemented
+- Build system and infrastructure complete
 
 ## Setup Decisions Made
 
@@ -103,20 +105,23 @@ Converting MT63 TypeScript implementation into a publishable npm library as `@ha
 - **Test imports**: Explicit imports preferred over globals (no `globals: true`)
 - **Build tool**: Start with `tsc`, revisit bundler need later
 
-## Phase 3: Code Architecture Improvements (Future - After Testing)
+## Phase 3: Code Architecture Improvements ✅ (Mostly Complete)
 
-- [ ] Unified API design
-- [ ] Class-based architecture for consistency
-- [ ] Directory restructuring (core/, dsp/, utils/, api/)
+- [x] Unified API design (MT63tx for encoding, MT63rx for decoding)
+- [x] Class-based architecture for consistency
+- [x] MT63 mode-specific constants with proper center frequencies
+- [x] Consolidated encoding functionality into MT63tx
+- [x] Separated Web Audio API logic into public API layer
+- [ ] Directory restructuring (core/, dsp/, utils/, api/) - Deferred
 - [ ] Type definitions improvements
 - [ ] Error handling improvements
-- [ ] Audit and migrate to typed arrays for performance (Float32Array, Float64Array, Int32Array, etc.)
+- [ ] Audit and migrate to typed arrays for performance (Float32Array, Float64Array, Int32Array, etc.) - **CURRENT FOCUS**
 - [ ] Optimize typed array usage (subarray() vs slice(), buffer reuse, minimize allocations)
 
-## Phase 4: Library Interface Design (After Testing)
+## Phase 4: Library Interface Design ✅ (Complete)
 
-- [ ] Main entry point (index.ts)
-- [ ] Consistent naming conventions
+- [x] Main entry point (index.ts) - exports MT63tx, MT63rx, createAudioSource helper
+- [x] Consistent naming conventions
 - [ ] JSDoc documentation
 - [ ] Usage examples and README
 
@@ -131,8 +136,10 @@ Converting MT63 TypeScript implementation into a publishable npm library as `@ha
 ## Notes
 
 - When I say "notes" I refer to any `.md` file with instructions, not just this Notes section
-- Current architecture inconsistency: MT63Client (class) vs MT63typescript (functions)
-- Need to decide on unified API structure
+- **DEVIATION FROM PLAN**: We implemented architecture improvements before comprehensive testing
+- **CURRENT STATUS**: Major refactoring complete, now focusing on typed array optimization
+- Architecture is now unified: MT63tx (encoding), MT63rx (decoding), createAudioSource (Web Audio helper)
+- Next priority: Optimize performance with proper typed array usage
 - **Testing First**: Must write comprehensive tests before any restructuring/refactoring
 - Keep current file structure until tests provide safety net for changes
 - Don't say "You're absolutely right!" -- While I get the last say I would like you to push back on anything I say that doesn't follow common or best practice.
