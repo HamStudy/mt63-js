@@ -15,7 +15,25 @@ export function encodeString(
   length: number;
   sampleRate: number;
 } {
-  return mt63Client.encodeString(text, bandwidth, longInterleave, audioCtx);
+  const { samples, sampleRate } = mt63Client.encodeToSamples(
+    text,
+    bandwidth,
+    longInterleave
+  );
+
+  const audioBuffer = audioCtx.createBuffer(1, samples.length, sampleRate);
+  audioBuffer.copyToChannel(samples, 0);
+
+  const source = audioCtx.createBufferSource();
+  source.buffer = audioBuffer;
+  source.connect(audioCtx.destination);
+
+  return {
+    source,
+    buffer: audioBuffer,
+    length: samples.length,
+    sampleRate,
+  };
 }
 
 export { MT63rx } from './MT63rx';
