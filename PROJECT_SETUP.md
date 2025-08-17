@@ -136,5 +136,7 @@ Converting MT63 TypeScript implementation into a publishable npm library as `@ha
 - **Testing First**: Must write comprehensive tests before any restructuring/refactoring
 - Keep current file structure until tests provide safety net for changes
 - Don't say "You're absolutely right!" -- While I get the last say I would like you to push back on anything I say that doesn't follow common or best practice.
-- Commit often, possibly after ever step. When in doubt ask if we should commit the changes just made. Unless there is a good reason to add more, keep commit messages to one line. Describing what is changed in the commit message isn't helpful as someone can see this by the changes themselves. Writing a message that describes the reason for the change is more helpful.
+- Commit often, possibly after ever step. When in doubt ask if we should commit the changes just made.
+- Commit messages should be a single line.
+- Commit messages should explain what changed for the purpose of why.
 - timeout is not a command, don't try to use it
