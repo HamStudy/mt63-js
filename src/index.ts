@@ -17,4 +17,4 @@ export function encodeString(
   return mt63Client.encodeString(text, bandwidth, longInterleave, audioCtx);
 }
 
-export { initRx, processAudioResample as processAudio } from './MT63typescript';
+export { MT63rx } from './MT63rx';

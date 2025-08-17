@@ -19,6 +19,8 @@ import { DspCmpxMixer } from './dspCmpxMixer';
 import { DspDelayLine } from './DspDelayLine';
 import { longInterleavePattern, shortInterleavePattern } from './mt63intl';
 import { MT63decoder } from './MT63Decoder';
+import { Downsampler } from './downsample';
+import { CENTER_FREQUENCY, SAMPLE_RATE } from './constants';
 
 const SYMBOL_DIV = 4;
 const DataCarriers = 64;
@@ -41,6 +43,9 @@ export class MT63rx {
   private TestOfs!: DspCmpxMixer;
   private ProcLine!: DspDelayLine;
   private SpectradspPower!: Float64Array;
+  private downsampler: Downsampler | undefined;
+  private squelch = 8.0;
+  private escape = false;
 
   SyncPipe: dspCmpx[][] = [];
 
@@ -123,13 +128,20 @@ export class MT63rx {
   // Output buffer
   Output: { Data: number[]; Len: number } = { Data: [], Len: 0 };
 
-  // Character escape handling (for characters > 127)
-  private escape = 0;
-
   // Process delay
   ProcdspDelay!: number;
 
   SpectraDisplay: ((spectra: Float64Array, len: number) => void) | undefined;
+
+  constructor(
+    bandwidth: 2000 | 1000 | 500,
+    interleave: boolean,
+    integration: number,
+    squelch: number
+  ) {
+    this.Preset(CENTER_FREQUENCY, bandwidth, interleave, integration);
+    this.squelch = squelch;
+  }
 
   Preset(
     centerFrequency: number,
@@ -358,7 +370,7 @@ export class MT63rx {
     }
   }
 
-  Process(input: Float32Array): void {
+  processAudio(input: Float32Array): string {
     // TestOfs.Omega += (-0.005 * (2.0 * Math.PI / 512)); // simulate frequency drift
 
     this.Output.Len = 0;
@@ -435,6 +447,51 @@ export class MT63rx {
     }
     this.SyncProcPtr -= this.ProcLine.inpLen;
     this.DataProcPtr -= this.ProcLine.inpLen;
+
+    if (this.Decoder.SignalToNoise < this.squelch) {
+      return '';
+    }
+    let lastString = '';
+    for (let i = 0; i < this.Output.Len; ++i) {
+      let c = this.Output.Data[i];
+      if (c < 8 && !this.escape) {
+        continue;
+      }
+      if (c === 127) {
+        this.escape = true;
+        continue;
+      }
+      if (this.escape) {
+        c += 128;
+        this.escape = false;
+      }
+      lastString += String.fromCharCode(c);
+    }
+    return lastString;
+  }
+
+  processAudioResample(samples: Float32Array, sampleRate: number): string {
+    const ratioWeight = sampleRate / SAMPLE_RATE;
+    if (ratioWeight === 1) {
+      return this.processAudio(samples);
+    } else if (ratioWeight < 1) {
+      return 'ERROR BAD SAMPLE RATE';
+    }
+    if (!this.downsampler || ratioWeight !== this.downsampler.ratioWeight) {
+      this.downsampler = new Downsampler(sampleRate, SAMPLE_RATE);
+    }
+    // Downsample
+    const maxOutputSize = this.downsampler.calculateMaxOutputSize(
+      samples.length
+    );
+    if (!this.resampleBuffer || this.resampleBuffer.length < maxOutputSize) {
+      this.resampleBuffer = new Float32Array(maxOutputSize);
+    }
+    const inputBuffer = this.downsampler.downSample(
+      samples,
+      this.resampleBuffer
+    );
+    return this.processAudio(inputBuffer);
   }
 
   DoCorrelSum(Correl1: dspCmpx[], Correl2: dspCmpx[], Aver: dspCmpx[]): void {
