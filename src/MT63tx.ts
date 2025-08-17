@@ -1,5 +1,5 @@
 import { DspCmpxBuff, dspWindowBlackman3 } from './dsp';
-import { MT63Encoder, MT63encoderOld } from './MT63encoder';
+import { MT63Encoder } from './MT63encoder';
 import { longInterleavePattern, shortInterleavePattern } from './mt63intl';
 import { DataCarrSepar, SymbolLen, SymbolSepar, SymbolShape } from './Symbol';
 import { dspCmpxOverlapWindow } from './dspCmpxOverlapWindow';
@@ -23,7 +23,6 @@ export class MT63tx {
   // private CarrMarkCode: number;
   // private CarrMarkAmpl: number;
   private Encoder!: MT63Encoder;
-  private EncoderOld: MT63encoderOld = new MT63encoderOld();
   private TxVect: Int32Array = new Int32Array(0); // C++ uses int*
   private dspPhaseCorr: Int32Array = new Int32Array(0); // C++ uses int*
   private WindowBuff = new DspCmpxBuff();
