@@ -14,7 +14,7 @@
     "modem"
   ],
   "author": "HamStudy.org LLC",
-  "license": "SEE LICENSE IN LICENSE",
+  "license": "GPL-3.0-or-later",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/HamStudy/mt63-js.git"
