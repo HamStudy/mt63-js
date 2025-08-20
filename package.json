@@ -1,6 +1,6 @@
 {
   "name": "@hamstudy/mt63",
-  "version": "1.0.0-beta.0",
+  "version": "1.0.0",
   "description": "TypeScript implementation of MT63 digital mode for amateur radio",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
